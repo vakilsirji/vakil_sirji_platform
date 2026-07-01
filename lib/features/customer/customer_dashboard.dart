@@ -256,7 +256,12 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: SafeArea(child: pages[_currentIndex]),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: SafeArea(child: pages[_currentIndex]),
+        ),
+      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
