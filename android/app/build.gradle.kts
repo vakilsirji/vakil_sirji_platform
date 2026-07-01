@@ -32,6 +32,14 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    // Exclude sourceSets that failed, we will use task hook instead.
+}
+
+tasks.withType<JavaCompile> {
+    doFirst {
+        file("src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java").delete()
+    }
 }
 
 kotlin {
