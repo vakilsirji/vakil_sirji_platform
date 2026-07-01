@@ -293,7 +293,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           ),
         ),
       ),
-      floatingActionButton: (_currentIndex == 0 || _currentIndex == 1) ? FloatingActionButton.extended(
+      floatingActionButton: _currentIndex == 1 ? FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
             context,
