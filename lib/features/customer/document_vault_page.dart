@@ -168,7 +168,7 @@ class _CategoryDocsSheetState extends State<_CategoryDocsSheet> {
   }
 
   Future<void> _uploadNewDocument() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
       withData: true,

@@ -76,7 +76,7 @@ class _ProcessCaseScreenState extends State<ProcessCaseScreen> {
   }
 
   Future<void> _uploadDocument() async {
-    final result = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+    final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (result != null && result.files.single.bytes != null) {
       setState(() => _isUpdating = true);
       try {

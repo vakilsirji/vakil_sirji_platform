@@ -318,7 +318,7 @@ class _AgreementDetailsSheetState extends State<_AgreementDetailsSheet> {
                 onPressed: _isUploading ? null : () async {
                   setState(() => _isUploading = true);
                   try {
-                    final result = await FilePicker.platform.pickFiles(
+                    final result = await FilePicker.pickFiles(
                       type: FileType.custom,
                       allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
                       withData: true,

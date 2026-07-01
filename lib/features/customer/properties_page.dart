@@ -17,7 +17,7 @@ class PropertiesPage extends StatelessWidget {
   const PropertiesPage({super.key, required this.properties, required this.tenants, this.onAddProperty, this.onEditProperty, this.onDeleteProperty, this.onCreateAgreement});
 
   Future<void> _uploadPhoto(BuildContext context, String propertyId) async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFiles(
       type: FileType.image,
       withData: true,
     );
