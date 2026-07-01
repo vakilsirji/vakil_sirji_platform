@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  
+  <title>GharBook – Your Digital Property Record</title>
+  <meta name="description" content="GharBook: free property management platform for owners. Manage tenants, rent, documents & reminders." />
+  
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="GharBook">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://github.com/corbado/flutter-passkeys/releases/download/2.4.0/bundle.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* ===== RESET & BASE (mobile-first) ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafcff;
+      color: #0b1a33;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding: 0 0 0 0;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.25rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.6rem 1.3rem;
+      border-radius: 100px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: transparent;
+      color: #0b1a33;
+      letter-spacing: -0.01em;
+    }
+
+    .btn-primary {
+      background: #0b1a33;
+      color: white;
+      box-shadow: 0 8px 20px rgba(11, 26, 51, 0.12);
+    }
+    .btn-primary:hover {
+      background: #1f2f4a;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(11, 26, 51, 0.18);
+    }
+
+    .btn-outline {
+      border: 1.5px solid #d0dae8;
+      background: white;
+    }
+    .btn-outline:hover {
+      border-color: #0b1a33;
+      background: #f0f4fe;
+    }
+
+    .btn-accent {
+      background: #6c5ce7;
+      color: white;
+      box-shadow: 0 8px 20px rgba(108, 92, 231, 0.25);
+    }
+    .btn-accent:hover {
+      background: #5a4bd1;
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(108, 92, 231, 0.35);
+    }
+
+    .btn-ghost {
+      color: #0b1a33;
+      font-weight: 600;
+    }
+    .btn-ghost:hover {
+      background: rgba(11, 26, 51, 0.04);
+    }
+
+    /* ===== STICKY NAVIGATION (mobile-first) ===== */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.78);
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      border-bottom: 1px solid rgba(208, 218, 232, 0.25);
+      padding: 0.5rem 0;
+      transition: box-shadow 0.2s;
+    }
+
+    .navbar.scrolled {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-logo span {
+      background: #6c5ce7;
+      color: white;
+      font-size: 1rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      margin-right: 0.1rem;
+    }
+
+    .nav-logo .tag {
+      font-weight: 400;
+      font-size: 0.6rem;
+      background: #eef2f9;
+      padding: 0.1rem 0.5rem;
+      border-radius: 100px;
+      color: #2d3f5e;
+      letter-spacing: 0.2px;
+      margin-left: 0.2rem;
+    }
+
+    .nav-links {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      padding: 0.8rem 0 0.4rem;
+      gap: 0.9rem;
+      background: transparent;
+      border-top: 1px solid rgba(208, 218, 232, 0.3);
+      margin-top: 0.5rem;
+    }
+
+    .nav-links.open {
+      display: flex;
+    }
+
+    .nav-links a {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: #1f2f4a;
+      transition: color 0.2s;
+      padding: 0.2rem 0;
+    }
+    .nav-links a:hover {
+      color: #6c5ce7;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .nav-actions .btn {
+      display: none;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.9rem;
+    }
+
+    .nav-actions .btn-primary {
+      padding: 0.4rem 1rem;
+    }
+
+    @media (min-width: 900px) {
+      .nav-actions .btn {
+        display: inline-flex;
+      }
+    }
+
+    .nav-toggle {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0.3rem 0.2rem;
+      margin-left: 0.3rem;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 2.5px;
+      background: #0b1a33;
+      border-radius: 10px;
+      transition: 0.2s;
+    }
+
+    /* ===== HERO (mobile-first) ===== */
+    .hero {
+      padding: 2rem 0 2.5rem;
+      background: linear-gradient(165deg, #f0f6ff 0%, #ffffff 80%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2.2rem;
+      align-items: center;
+    }
+
+    .hero-content {
+      text-align: center;
+    }
+
+    .hero-content h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-content h1 .highlight {
+      background: linear-gradient(145deg, #6c5ce7, #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-content p {
+      font-size: 1rem;
+      color: #2d3f5e;
+      max-width: 480px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+
+    .hero-actions .btn {
+      font-size: 0.95rem;
+      padding: 0.7rem 1.5rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(108, 92, 231, 0.08);
+      padding: 0.2rem 0.9rem 0.2rem 0.6rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #4a3f7a;
+      margin-bottom: 1rem;
+    }
+    .hero-badge span {
+      background: #6c5ce7;
+      color: white;
+      border-radius: 100px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.65rem;
+    }
+
+    .powered {
+      font-size: 0.75rem;
+      color: #5a6e8a;
+      margin-top: 1rem;
+      letter-spacing: 0.2px;
+    }
+
+    /* ===== DASHBOARD MOCKUP (mobile-first) ===== */
+    .dashboard-mockup {
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px -12px rgba(0, 20, 40, 0.2), 0 6px 18px rgba(0, 0, 0, 0.03);
+      padding: 1rem 1rem 1.2rem;
+      border: 1px solid rgba(208, 218, 232, 0.25);
+      transition: transform 0.25s ease;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .dashboard-mockup:hover {
+      transform: translateY(-4px);
+    }
+
+    .mockup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid #eef2f9;
+    }
+
+    .mockup-dots {
+      display: flex;
+      gap: 5px;
+    }
+    .mockup-dots span {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #d0dae8;
+    }
+    .mockup-dots span:first-child {
+      background: #ff6b6b;
+    }
+    .mockup-dots span:nth-child(2) {
+      background: #feca57;
+    }
+    .mockup-dots span:last-child {
+      background: #48dbfb;
+    }
+
+    .mockup-user {
+      font-weight: 600;
+      font-size: 0.7rem;
+      color: #2d3f5e;
+      background: #f0f4fe;
+      padding: 0.15rem 0.7rem;
+      border-radius: 100px;
+    }
+
+    .mockup-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-card {
+      background: #f8faff;
+      padding: 0.5rem 0.2rem;
+      border-radius: 14px;
+      text-align: center;
+      border: 1px solid #eef2f9;
+    }
+    .stat-card .num {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #0b1a33;
+      line-height: 1.2;
+    }
+    .stat-card .label {
+      font-size: 0.6rem;
+      color: #5a6e8a;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+    }
+
+    .mockup-list {
+      background: #f8faff;
+      border-radius: 16px;
+      padding: 0.4rem 0.8rem;
+      border: 1px solid #eef2f9;
+    }
+
+    .mockup-list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #e6ecf6;
+      font-size: 0.75rem;
+      gap: 0.3rem;
+      flex-wrap: wrap;
+    }
+    .mockup-list-item:last-child {
+      border-bottom: none;
+    }
+    .mockup-list-item .tag {
+      background: #e0e7f5;
+      padding: 0.1rem 0.6rem;
+      border-radius: 100px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: #2d3f5e;
+      white-space: nowrap;
+    }
+    .mockup-list-item .tag.green {
+      background: #d4edda;
+      color: #1e7e34;
+    }
+    .mockup-list-item .tag.purple {
+      background: #e9daff;
+      color: #5a4bd1;
+    }
+
+    .mockup-footnote {
+      font-size: 0.6rem;
+      text-align: right;
+      margin-top: 0.6rem;
+      color: #8a9bb5;
+    }
+
+    /* ===== SECTION TITLES ===== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-sub {
+      text-align: center;
+      color: #5a6e8a;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      font-size: 1rem;
+    }
+
+    /* ===== FEATURES GRID ===== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 1.2rem 0.8rem;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+      border: 1px solid #eef2f9;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .feature-card:hover {
+      border-color: #d0dae8;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+    .feature-card .icon {
+      font-size: 1.8rem;
+      margin-bottom: 0.3rem;
+      display: block;
+    }
+    .feature-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+    .feature-card p {
+      font-size: 0.8rem;
+      color: #5a6e8a;
+    }
+
+    /* ===== STEPS ===== */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .step-card {
+      background: white;
+      padding: 1rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid #eef2f9;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+    .step-card .num {
+      display: inline-block;
+      background: #6c5ce7;
+      color: white;
+      border-radius: 100px;
+      padding: 0.1rem 0.7rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .step-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    /* ===== SCREENSHOTS ===== */
+    .shots-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+      margin: 1rem 0;
+    }
+    .shot-item {
+      background: linear-gradient(145deg, #eef2f9, #f8faff);
+      border-radius: 24px;
+      aspect-ratio: 9 / 16;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #2d3f5e;
+      border: 1px solid #e6ecf6;
+      font-size: 0.8rem;
+      padding: 0.5rem;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+    }
+
+    /* ===== LEGAL SERVICES ===== */
+    .legal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.7rem;
+      margin: 1rem 0;
+    }
+    .legal-chip {
+      background: white;
+      padding: 0.8rem 0.4rem;
+      border-radius: 40px;
+      border: 1px solid #eef2f9;
+      text-align: center;
+      font-weight: 500;
+      font-size: 0.85rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    /* ===== FAQ ===== */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin: 1.5rem 0;
+    }
+    .faq-item {
+      background: white;
+      border-radius: 18px;
+      border: 1px solid #eef2f9;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+    .faq-item summary {
+      font-weight: 600;
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+    .faq-item summary::after {
+      content: "▾";
+      font-size: 1.2rem;
+      color: #6c5ce7;
+      transition: 0.2s;
+    }
+    .faq-item[open] summary::after {
+      transform: rotate(180deg);
+    }
+    .faq-item .faq-body {
+      padding: 0 1rem 1rem 1rem;
+      color: #2d3f5e;
+      font-size: 0.9rem;
+    }
+
+    /* ===== CTA ===== */
+    .cta-block {
+      background: linear-gradient(135deg, #0b1a33, #1f2f4a);
+      color: white;
+      padding: 2rem 1.5rem;
+      border-radius: 28px;
+      text-align: center;
+      margin: 1.5rem 0;
+      box-shadow: 0 20px 40px -10px rgba(11, 26, 51, 0.25);
+    }
+    .cta-block h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .cta-block p {
+      opacity: 0.8;
+      margin: 0.4rem 0 1.2rem;
+    }
+    .cta-block .btn {
+      background: white;
+      color: #0b1a33;
+      font-weight: 700;
+      padding: 0.7rem 2rem;
+    }
+    .cta-block .btn:hover {
+      background: #f0f4fe;
+      transform: scale(1.02);
+    }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      background: #0b1a33;
+      color: #cbd5e1;
+      padding: 2rem 1rem;
+      text-align: center;
+      border-radius: 28px 28px 0 0;
+      margin-top: 2rem;
+    }
+    .footer h3 {
+      color: white;
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+    .footer .brand-tag {
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+    .footer .powered {
+      font-size: 0.7rem;
+      opacity: 0.6;
+      margin-top: 0.2rem;
+    }
+    .footer .copy {
+      font-size: 0.7rem;
+      opacity: 0.5;
+      margin-top: 0.8rem;
+    }
+
+    /* ===== RESPONSIVE : TABLET & DESKTOP ===== */
+    @media (min-width: 640px) {
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+      .steps-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+      }
+      .shots-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+      .legal-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+      }
+      .hero-content h1 {
+        font-size: 2.8rem;
+      }
+      .stat-card .num {
+        font-size: 1.6rem;
+      }
+    }
+
+    @media (min-width: 900px) {
+      .nav-links {
+        display: flex !important;
+        flex-direction: row;
+        width: auto;
+        padding: 0;
+        border-top: none;
+        margin-top: 0;
+        gap: 2rem;
+      }
+      .nav-toggle {
+        display: none;
+      }
+      .hero-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+      }
+      .hero-content {
+        text-align: left;
+      }
+      .hero-content p {
+        margin: 0 0 1.5rem 0;
+      }
+      .hero-actions {
+        justify-content: flex-start;
+      }
+      .hero-content h1 {
+        font-size: 3.8rem;
+      }
+      .features-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+      }
+      .steps-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+      }
+      .shots-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+      }
+      .legal-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.2rem;
+      }
+      .section-title {
+        font-size: 2.8rem;
+      }
+      .cta-block {
+        padding: 3rem 2rem;
+      }
+      .cta-block h2 {
+        font-size: 2.5rem;
+      }
+    }
+
+    @media (min-width: 1100px) {
+      .container {
+        padding: 0 2rem;
+      }
+      .hero {
+        padding: 4rem 0 5rem;
+      }
+      .dashboard-mockup {
+        padding: 1.5rem;
+      }
+    }
+
+    /* ===== UTILITY ===== */
+    .mt-1 {
+      margin-top: 0.5rem;
+    }
+    .mb-1 {
+      margin-bottom: 0.5rem;
+    }
+    .mb-2 {
+      margin-bottom: 1.5rem;
+    }
+    .text-center {
+      text-align: center;
+    }
+    .gap-1 {
+      gap: 0.5rem;
+    }
+    .fw-600 {
+      font-weight: 600;
+    }
+    .muted {
+      color: #5a6e8a;
+    }
+    .section-pad {
+      padding: 2.5rem 0 1.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div id="landing-container">
+  <!-- ========== STICKY NAVIGATION ========== -->
+  <header class="navbar" id="navbar">
+    <div class="container nav-container">
+      <div class="nav-logo">
+        <img src="logo.png" alt="GharBook Logo" style="height: 48px; width: 48px; border-radius: 12px; object-fit: contain; margin-right: 4px;"> GharBook
+        <span class="tag">FREE</span>
+      </div>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how">How It Works</a></li>
+        <li><a href="#shots">Screenshots</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="#" class="btn btn-ghost open-app-btn">Log in</a>
+        <a href="#" class="btn btn-primary open-app-btn">Create free account</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========== HERO + DASHBOARD ========== -->
+    <section class="hero">
+      <div class="container hero-grid">
+
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span>🔥</span> Free property management
+          </div>
+          <h1>
+            Your Digital <br><span class="highlight">Property Record</span>
+          </h1>
+          <p>
+            Manage properties, tenants, rent, documents, and reminders — all in one free platform.
+          </p>
+          <div class="hero-actions">
+            <a href="#" class="btn btn-primary open-app-btn">Create free account →</a>
+            <a href="#" class="btn btn-outline open-app-btn">Log in</a>
+          </div>
+          <div class="powered">⚡ Powered by Vakil Sirji LegalTech Services</div>
+        </div>
+
+        <!-- dashboard mockup -->
+        <div class="dashboard-mockup">
+          <div class="mockup-header">
+            <div class="mockup-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <div class="mockup-user">👤 Owner: Rajesh</div>
+          </div>
+
+          <div class="mockup-stats">
+            <div class="stat-card">
+              <div class="num">4</div>
+              <div class="label">Properties</div>
+            </div>
+            <div class="stat-card">
+              <div class="num">7</div>
+              <div class="label">Tenants</div>
+            </div>
+            <div class="stat-card">
+              <div class="num">₹2.4L</div>
+              <div class="label">Collected</div>
+            </div>
+          </div>
+
+          <div class="mockup-list">
+            <div class="mockup-list-item">
+              <span>🏢 Green Valley – Flat 302</span>
+              <span class="tag green">Rent paid</span>
+            </div>
+            <div class="mockup-list-item">
+              <span>🏡 Lake View – Bungalow</span>
+              <span class="tag purple">Expiry: 12 Dec</span>
+            </div>
+            <div class="mockup-list-item">
+              <span>📄 Sale Deed – Property #4</span>
+              <span class="tag">Pending</span>
+            </div>
+            <div class="mockup-list-item" style="border-bottom: none;">
+              <span>🔔 Rent due • 2 days</span>
+              <span class="tag" style="background: #fce8e6; color: #b33;">Alert</span>
+            </div>
+          </div>
+          <div class="mockup-footnote">* simulated dashboard</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FEATURES ========== -->
+    <section id="features" class="section-pad">
+      <div class="container">
+        <h2 class="section-title">Everything you need</h2>
+        <p class="section-sub">Manage your property portfolio with ease</p>
+        <div class="features-grid">
+          <div class="feature-card"><span class="icon">🏠</span><h4>Multiple Properties</h4><p>Unlimited properties</p></div>
+          <div class="feature-card"><span class="icon">👥</span><h4>Tenant Management</h4><p>Full tenant records</p></div>
+          <div class="feature-card"><span class="icon">💰</span><h4>Rent Tracking</h4><p>Track collections</p></div>
+          <div class="feature-card"><span class="icon">📄</span><h4>Document Storage</h4><p>Agreements &amp; deeds</p></div>
+          <div class="feature-card"><span class="icon">⏰</span><h4>Smart Reminders</h4><p>Rent &amp; expiry alerts</p></div>
+          <div class="feature-card"><span class="icon">📊</span><h4>Agreement History</h4><p>Full audit trail</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section id="how" class="section-pad" style="padding-top:0;">
+      <div class="container">
+        <h2 class="section-title">How it works</h2>
+        <p class="section-sub">Get started in minutes</p>
+        <div class="steps-grid">
+          <div class="step-card"><span class="num">1</span><h4>Create account</h4></div>
+          <div class="step-card"><span class="num">2</span><h4>Add properties</h4></div>
+          <div class="step-card"><span class="num">3</span><h4>Add tenants</h4></div>
+          <div class="step-card"><span class="num">4</span><h4>Track &amp; renew</h4></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== SCREENSHOTS ========== -->
+    <section id="shots" class="section-pad" style="padding-top:0;">
+      <div class="container">
+        <h2 class="section-title">Screenshots</h2>
+        <p class="section-sub">See GharBook in action</p>
+        <div class="shots-grid">
+          <div class="shot-item">📊 Dashboard</div>
+          <div class="shot-item">🏠 Properties</div>
+          <div class="shot-item">👥 Tenants</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== WHY GHARBOOK ========== -->
+    <section class="section-pad" style="padding-top:0;">
+      <div class="container">
+        <h2 class="section-title">Why GharBook?</h2>
+        <p class="section-sub">Built for property owners, by property experts</p>
+        <div class="features-grid" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="feature-card"><span class="icon">🔒</span><h4>Secure &amp; Private</h4><p>Your data is safe</p></div>
+          <div class="feature-card"><span class="icon">⚡</span><h4>Fast &amp; Intuitive</h4><p>Designed for ease</p></div>
+          <div class="feature-card"><span class="icon">❤️</span><h4>Free Forever</h4><p>No hidden charges</p></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ========== FAQ ========== -->
+    <section id="faq" class="section-pad" style="padding-top:0;">
+      <div class="container">
+        <h2 class="section-title">Frequently asked questions</h2>
+        <div class="faq-list">
+          <details class="faq-item" open>
+            <summary>Is GharBook really free?</summary>
+            <div class="faq-body">Yes, GharBook is completely free for property owners. No credit card required.</div>
+          </details>
+          <details class="faq-item">
+            <summary>Can I manage multiple properties?</summary>
+            <div class="faq-body">Absolutely. Add unlimited properties and tenants under one account.</div>
+          </details>
+          <details class="faq-item">
+            <summary>How do rent reminders work?</summary>
+            <div class="faq-body">GharBook sends automatic reminders for rent due and agreement expiry.</div>
+          </details>
+          <details class="faq-item">
+            <summary>Is my data secure?</summary>
+            <div class="faq-body">Yes, we use bank-grade encryption to protect your property records.</div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== FINAL CTA ========== -->
+    <section style="padding:0.5rem 0 2.5rem;">
+      <div class="container">
+        <div class="cta-block">
+          <h2>Start using GharBook today</h2>
+          <p>Your Digital Property Record — free forever</p>
+          <a href="#" class="btn open-app-btn">Create free account →</a>
+          <div style="margin-top:1rem;font-size:0.8rem;opacity:0.6;">⚡ Powered by Vakil Sirji LegalTech Services</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div style="margin-bottom: 12px;">
+      <img src="logo.png" alt="GharBook Logo" style="height: 64px; width: 64px; border-radius: 16px; object-fit: contain;">
+    </div>
+    <h3 style="margin: 0; margin-bottom: 4px;">GharBook</h3>
+    <div class="brand-tag">Your Digital Property Record</div>
+    <div class="powered">Powered by Vakil Sirji LegalTech Services</div>
+    <div class="copy">© 2026 GharBook. All rights reserved.</div>
+  </footer>
+</div>
+
+  <div id="flutter-app-host" style="display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 9999;"></div>
+
+  <!-- ====== JAVASCRIPT ====== -->
+  <script>
+    (function() {
+      'use strict';
+
+      // ---- Mobile nav toggle ----
+      const toggleBtn = document.getElementById('navToggle');
+      const navLinks = document.getElementById('navLinks');
+
+      if (toggleBtn && navLinks) {
+        toggleBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          navLinks.classList.toggle('open');
+        });
+
+        navLinks.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            navLinks.classList.remove('open');
+          });
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!navLinks.contains(e.target) && !toggleBtn.contains(e.target)) {
+            navLinks.classList.remove('open');
+          }
+        });
+      }
+
+      // ---- Sticky nav shadow ----
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 20) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      }, { passive: true });
+
+      // ---- Connect to Flutter Web app ----
+      function openFlutterApp() {
+        document.getElementById('landing-container').style.display = 'none';
+        document.getElementById('flutter-app-host').style.display = 'block';
+        if (window.initFlutterApp) {
+          window.initFlutterApp();
+        }
+      }
+
+      document.querySelectorAll('.open-app-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          const baseHref = document.querySelector('base')?.getAttribute('href') || '/';
+          if (btn.textContent.includes('Create') || btn.classList.contains('btn-primary')) {
+            window.location.hash = '/register';
+          } else {
+            window.location.hash = '/';
+          }
+          openFlutterApp();
+        });
+      });
+
+      // Automatically launch Flutter if we are on a specific route (e.g., refreshing on dashboard)
+      window.addEventListener('load', function() {
+        if ((window.location.pathname !== '/' && window.location.pathname !== '/index.html') || window.location.hash.length > 1) {
+          openFlutterApp();
+        }
+      });
+    })();
+  </script>
+  
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
