@@ -1,5 +1,5 @@
 enum UserRole {
-  owner, tenant, sales, dataEntry, verification, biometric, manager, admin
+  owner, tenant, staff, sales, dataEntry, verification, biometric, manager, admin
 }
 
 class UserProfile {

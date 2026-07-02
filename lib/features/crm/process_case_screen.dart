@@ -44,6 +44,11 @@ class _ProcessCaseScreenState extends State<ProcessCaseScreen> {
     return _workflowSteps.indexWhere((step) => step['status'] == _currentStatus);
   }
 
+  String _formatKey(String key) {
+    if (key.isEmpty) return key;
+    return key.replaceAll('_', ' ').split(' ').map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}').join(' ');
+  }
+
   Future<void> _advanceStatus() async {
     final nextIndex = _currentStepIndex + 1;
     if (nextIndex >= _workflowSteps.length) return;
@@ -122,15 +127,98 @@ class _ProcessCaseScreenState extends State<ProcessCaseScreen> {
             padding: const EdgeInsets.all(20),
             color: Colors.white,
             width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.45),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 Text('CASE ID: ${widget.legalCase.requestId.substring(0, 8).toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
                 const SizedBox(height: 4),
                 Text(widget.legalCase.title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
                 const SizedBox(height: 8),
                 Text('Client: ${widget.legalCase.clientName}', style: const TextStyle(fontSize: 14, color: AppColors.slate500)),
+                if (widget.legalCase.details != null) ...[
+                  const SizedBox(height: 16),
+                  const Text('Form Details:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A))),
+                  const SizedBox(height: 8),
+                  ...widget.legalCase.details!.entries
+                    .where((e) => e.key != 'uploaded_files' && e.key != 'property_id' && e.key != 'tenant_id' && e.key != 'is_existing_agreement')
+                    .where((e) => e.value.toString().isNotEmpty)
+                    .map((e) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(width: 140, child: Text('${_formatKey(e.key)}:', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.slate500))),
+                          Expanded(child: Text(e.value.toString(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF0F172A)))),
+                        ],
+                      ),
+                    )).toList(),
+                ],
+                if (widget.legalCase.details != null && widget.legalCase.details!['uploaded_files'] != null) ...[
+                  const SizedBox(height: 16),
+                  const Text('Uploaded Documents:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A))),
+                  const SizedBox(height: 8),
+                  ...(widget.legalCase.details!['uploaded_files'] as Map).entries.map((e) => 
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context, 
+                            builder: (_) => AlertDialog(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                              title: Row(
+                                children: [
+                                  const Icon(Icons.description, color: Colors.blue),
+                                  const SizedBox(width: 8),
+                                  Expanded(child: Text(e.key, style: const TextStyle(fontSize: 18))),
+                                ],
+                              ),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    height: 150,
+                                    width: double.infinity,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade200,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: Colors.grey.shade400),
+                                    ),
+                                    child: const Center(
+                                      child: Icon(Icons.picture_as_pdf, size: 64, color: Colors.redAccent),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(e.value.toString(), style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  const SizedBox(height: 8),
+                                  const Text('This is a mock document viewer for the MVP. In production, this will render the actual file from Supabase Storage.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.grey)),
+                                ]
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context), 
+                                  child: const Text('Close', style: TextStyle(fontWeight: FontWeight.bold))
+                                )
+                              ]
+                            )
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            const Icon(Icons.attachment, size: 16, color: Colors.blue),
+                            const SizedBox(width: 8),
+                            Text('${e.key}: ', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: AppColors.slate600)),
+                            Expanded(child: Text(e.value.toString(), style: const TextStyle(color: Colors.blue, fontSize: 13, decoration: TextDecoration.underline))),
+                          ],
+                        ),
+                      ),
+                    )
+                  ).toList(),
+                ],
               ],
+            ),
             ),
           ),
           const SizedBox(height: 4),

@@ -167,23 +167,23 @@ class CrmDrawer extends StatelessWidget {
           onTap: () {
             if (title.contains('Leads')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const LeadsPage(initialFilter: 'All')));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Leads')), body: const LeadsPage(initialFilter: 'All'))));
             } else if (title.contains('Clients')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const ClientsPage(initialFilter: 'All')));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Clients')), body: const ClientsPage(initialFilter: 'All'))));
             } else if (title.contains('Properties')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const CrmPropertiesPage()));
-            } else if (title.contains('Cases')) {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Properties')), body: const CrmPropertiesPage())));
+            } else if (title.contains('Cases') || title.contains('Service')) {
               Navigator.pop(context);
               final cases = context.read<DatabaseService>().cases;
-              Navigator.push(context, MaterialPageRoute(builder: (context) => CrmCasesPage(cases: cases)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Service Requests')), body: CrmCasesPage(cases: cases))));
             } else if (title.contains('Documents')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const CrmDocumentsPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Documents')), body: const CrmDocumentsPage())));
             } else if (title.contains('Payments')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => const CrmPaymentsPage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Payments')), body: const CrmPaymentsPage())));
             } else if (title.contains('Staff')) {
               final userProfile = context.read<AuthService>().userProfile;
               if (userProfile?.role == UserRole.admin) {

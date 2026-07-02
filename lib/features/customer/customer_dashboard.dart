@@ -298,23 +298,52 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           ),
         ),
       ),
-      floatingActionButton: _currentIndex == 1 ? FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => CreateRequestScreen(
-                properties: properties,
-                tenants: tenants,
-                currentUser: _currentUser,
-                onSubmit: _addNewCase,
-              ),
-            ),
-          );
-        },
-        backgroundColor: const Color(0xFF0F172A),
-        icon: const Icon(Icons.add, color: Colors.amber),
-        label: const Text('Create Request', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      floatingActionButton: _currentIndex == 1 ? Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'fab_record',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateRequestScreen(
+                    properties: properties,
+                    tenants: tenants,
+                    currentUser: _currentUser,
+                    onSubmit: _addNewCase,
+                    initialIsExisting: true,
+                  ),
+                ),
+              );
+            },
+            backgroundColor: Colors.blue.shade700,
+            icon: const Icon(Icons.history_edu, color: Colors.white),
+            label: const Text('Record Existing Agreement', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton.extended(
+            heroTag: 'fab_create',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateRequestScreen(
+                    properties: properties,
+                    tenants: tenants,
+                    currentUser: _currentUser,
+                    onSubmit: _addNewCase,
+                    initialIsExisting: false,
+                  ),
+                ),
+              );
+            },
+            backgroundColor: const Color(0xFF0F172A),
+            icon: const Icon(Icons.add, color: Colors.amber),
+            label: const Text('Create Agreement', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ) : null,
     );
   }

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants.dart';
 import '../../services/auth_service.dart';
 import '../../services/database_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AdminStaffManagementPage extends StatefulWidget {
   const AdminStaffManagementPage({super.key});
@@ -17,6 +18,29 @@ class _AdminStaffManagementPageState extends State<AdminStaffManagementPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  
+  List<Map<String, dynamic>> _staffList = [];
+  bool _isLoadingStaff = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStaffList();
+  }
+
+  Future<void> _fetchStaffList() async {
+    try {
+      final response = await Supabase.instance.client.from('profiles').select().eq('role', 'staff');
+      if (mounted) {
+        setState(() {
+          _staffList = List<Map<String, dynamic>>.from(response);
+          _isLoadingStaff = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isLoadingStaff = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -50,6 +74,7 @@ class _AdminStaffManagementPageState extends State<AdminStaffManagementPage> {
         _mobileController.clear();
         _emailController.clear();
         _passwordController.clear();
+        _fetchStaffList();
       }
     } catch (e) {
       if (mounted) {
@@ -129,6 +154,32 @@ class _AdminStaffManagementPageState extends State<AdminStaffManagementPage> {
                 ),
               ),
             ),
+            const SizedBox(height: 32),
+            const Text('Existing Staff Members', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+            const SizedBox(height: 16),
+            if (_isLoadingStaff)
+              const Center(child: CircularProgressIndicator())
+            else if (_staffList.isEmpty)
+              const Text('No staff members found.', style: TextStyle(color: AppColors.slate500))
+            else
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _staffList.length,
+                itemBuilder: (context, index) {
+                  final staff = _staffList[index];
+                  return Card(
+                    elevation: 1,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: ListTile(
+                      leading: const CircleAvatar(backgroundColor: Color(0xFF0F172A), child: Icon(Icons.person, color: Colors.white)),
+                      title: Text(staff['name'] ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text('${staff['email'] ?? 'No Email'} | ${staff['mobile'] ?? 'No Mobile'}'),
+                      trailing: const Chip(label: Text('Staff', style: TextStyle(fontSize: 10, color: Colors.blue)), backgroundColor: Colors.white, side: BorderSide(color: Colors.blue)),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),

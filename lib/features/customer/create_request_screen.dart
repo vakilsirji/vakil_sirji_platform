@@ -3,12 +3,14 @@ import '../../core/constants.dart';
 import '../../models/property.dart';
 import '../../models/tenant.dart';
 import '../../models/user_profile.dart';
+import 'package:file_picker/file_picker.dart';
 
 class CreateRequestScreen extends StatefulWidget {
   final List<Property> properties;
   final List<Tenant> tenants;
   final UserProfile currentUser;
   final void Function(String serviceType, String propertyId, String tenantId, [Map<String, dynamic>? manualDetails]) onSubmit;
+  final bool initialIsExisting;
 
   const CreateRequestScreen({
     super.key,
@@ -16,6 +18,7 @@ class CreateRequestScreen extends StatefulWidget {
     required this.tenants,
     required this.currentUser,
     required this.onSubmit,
+    this.initialIsExisting = false,
   });
 
   @override
@@ -25,9 +28,11 @@ class CreateRequestScreen extends StatefulWidget {
 class _CreateRequestScreenState extends State<CreateRequestScreen> {
   int _currentStep = 0;
   String _selectedService = 'Rent Agreement';
-  int _selectedOption = 2; // Default to Option 2 (Recommended)
+  late int _selectedOption;
   String? _selectedPropertyId;
   String? _selectedTenantId;
+  int _coOwnerCount = 0;
+  int _coTenantCount = 0;
 
   final List<String> _services = [
     'Rent Agreement',
@@ -37,6 +42,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedOption = widget.initialIsExisting ? 3 : 2;
     if (widget.properties.isNotEmpty) _selectedPropertyId = widget.properties.first.id;
     if (widget.tenants.isNotEmpty) _selectedTenantId = widget.tenants.first.id;
 
@@ -50,6 +56,24 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   }
 
   final Map<String, TextEditingController> _ctrls = {};
+  final Map<String, String> _uploadedFiles = {};
+
+  Future<void> _pickFile(String label, {bool allowMultiple = false}) async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg'],
+      allowMultiple: allowMultiple,
+    );
+    if (result != null && result.files.isNotEmpty) {
+      setState(() {
+        if (allowMultiple) {
+          _uploadedFiles[label] = result.files.map((e) => e.name).join(', ');
+        } else {
+          _uploadedFiles[label] = result.files.first.name;
+        }
+      });
+    }
+  }
 
   TextEditingController _getCtrl(String key) {
     _ctrls.putIfAbsent(key, () => TextEditingController());
@@ -57,15 +81,24 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   }
 
   void _submit() {
-    Map<String, dynamic>? manualDetails;
-    if (_selectedOption == 1 || _selectedOption == 3) {
-      manualDetails = {};
+    Map<String, dynamic>? manualDetails = {};
+    
+    if (_selectedOption == 1 || _selectedOption == 3 || _selectedOption == 2) {
       _ctrls.forEach((key, ctrl) {
         manualDetails![key] = ctrl.text;
       });
       if (_selectedOption == 3) {
-        manualDetails!['is_existing_agreement'] = true;
+        manualDetails['is_existing_agreement'] = true;
       }
+    }
+    
+    if (_selectedOption == 2) {
+      manualDetails['uploaded_files'] = _uploadedFiles;
+    }
+
+    // Attach uploaded files to all options if any exist
+    if (_uploadedFiles.isNotEmpty && _selectedOption != 2) {
+      manualDetails['uploaded_files'] = _uploadedFiles;
     }
 
     widget.onSubmit(_selectedService, _selectedPropertyId ?? '', _selectedTenantId ?? '', manualDetails);
@@ -128,99 +161,77 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
             items: _services.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
             onChanged: (val) => setState(() => _selectedService = val!),
           ),
-          const SizedBox(height: 24),
-          const Text('How would you like to proceed?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => setState(() { _selectedOption = 1; _currentStep = 0; }),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: _selectedOption == 1 ? Colors.amber.shade700 : AppColors.slate200, width: 2),
-                borderRadius: BorderRadius.circular(12),
-                color: _selectedOption == 1 ? Colors.amber.shade50 : Colors.white,
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.edit_document),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Option 1: Fill details yourself', style: TextStyle(fontWeight: FontWeight.bold)),
-                        Text('Manually type in all owner, tenant, and witness details.', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => setState(() { _selectedOption = 2; _currentStep = 0; }),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: _selectedOption == 2 ? const Color(0xFF0F172A) : AppColors.slate200, width: 2),
-                borderRadius: BorderRadius.circular(12),
-                color: _selectedOption == 2 ? AppColors.slate50 : Colors.white,
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.auto_awesome, color: Color(0xFF0F172A)),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Text('Option 2: We do it for you', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(4)),
-                              child: const Text('RECOMMENDED', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
-                            )
-                          ],
-                        ),
-                        const Text('Just upload documents. GharBook prepares everything.', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-                      ],
-                    ),
-                  )
-                ],
+          if (_selectedOption != 3) ...[
+            const SizedBox(height: 24),
+            const Text('How would you like to proceed?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () => setState(() { _selectedOption = 1; _currentStep = 0; }),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: _selectedOption == 1 ? Colors.amber.shade700 : AppColors.slate200, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  color: _selectedOption == 1 ? Colors.amber.shade50 : Colors.white,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit_document),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text('Option 1: Fill details yourself', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text('Manually type in all owner, tenant, and witness details.', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => setState(() { _selectedOption = 3; _currentStep = 0; }),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                border: Border.all(color: _selectedOption == 3 ? Colors.blue.shade700 : AppColors.slate200, width: 2),
-                borderRadius: BorderRadius.circular(12),
-                color: _selectedOption == 3 ? Colors.blue.shade50 : Colors.white,
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.history_edu, color: Colors.blue),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text('Option 3: Already have an agreement', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
-                        Text('Record details of an existing agreement to track reminders.', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
-                      ],
-                    ),
-                  )
-                ],
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () => setState(() { _selectedOption = 2; _currentStep = 0; }),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: _selectedOption == 2 ? const Color(0xFF0F172A) : AppColors.slate200, width: 2),
+                  borderRadius: BorderRadius.circular(12),
+                  color: _selectedOption == 2 ? AppColors.slate50 : Colors.white,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.auto_awesome, color: Color(0xFF0F172A)),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Text('Option 2: We do it for you', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(4)),
+                                child: const Text('RECOMMENDED', style: TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold)),
+                              )
+                            ],
+                          ),
+                          const Text('Just upload documents. GharBook prepares everything.', style: TextStyle(fontSize: 12, color: AppColors.slate500)),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
               ),
             ),
-          ),
+          ] else ...[
+            const SizedBox(height: 24),
+            const Text('You have selected to record an existing agreement. Proceed to the next step to enter the details.', style: TextStyle(color: AppColors.slate500)),
+          ],
         ],
       ),
     ));
@@ -253,6 +264,26 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
             _buildTextField('owner_aadhaar', 'Aadhaar Number'),
             _buildTextField('owner_pan', 'PAN Number'),
             _buildTextField('owner_address', 'Current Address', maxLines: 2),
+            for (int i = 1; i <= _coOwnerCount; i++) ...[
+              const Divider(height: 16),
+              Text('Co-Owner $i Details', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A))),
+              const SizedBox(height: 8),
+              _buildTextField('co_owner_${i}_name', 'Full Name'),
+              Row(
+                children: [
+                  Expanded(child: _buildTextField('co_owner_${i}_age', 'Age')),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 2, child: _buildTextField('co_owner_${i}_mobile', 'Mobile')),
+                ],
+              ),
+              _buildTextField('co_owner_${i}_aadhaar', 'Aadhaar Number'),
+              _buildTextField('co_owner_${i}_pan', 'PAN Number'),
+            ],
+            TextButton.icon(
+              onPressed: () => setState(() => _coOwnerCount++), 
+              icon: const Icon(Icons.add), 
+              label: const Text('Add Co-Owner')
+            ),
             const Divider(height: 32),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -305,6 +336,26 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
             _buildTextField('tenant_pan', 'PAN Number'),
             _buildTextField('tenant_address', 'Current Address', maxLines: 2),
             _buildTextField('tenant_perm_address', 'Permanent Address', maxLines: 2),
+            for (int i = 1; i <= _coTenantCount; i++) ...[
+              const Divider(height: 16),
+              Text('Co-Tenant $i Details', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A))),
+              const SizedBox(height: 8),
+              _buildTextField('co_tenant_${i}_name', 'Full Name'),
+              Row(
+                children: [
+                  Expanded(child: _buildTextField('co_tenant_${i}_age', 'Age')),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 2, child: _buildTextField('co_tenant_${i}_mobile', 'Mobile')),
+                ],
+              ),
+              _buildTextField('co_tenant_${i}_aadhaar', 'Aadhaar Number'),
+              _buildTextField('co_tenant_${i}_pan', 'PAN Number'),
+            ],
+            TextButton.icon(
+              onPressed: () => setState(() => _coTenantCount++), 
+              icon: const Icon(Icons.add), 
+              label: const Text('Add Co-Tenant')
+            ),
           ],
         ),
       ));
@@ -434,6 +485,33 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
        ));
     }
 
+    if (_selectedOption == 1 || _selectedOption == 2) {
+      steps.add(Step(
+        title: const Text('Agreement Period', style: TextStyle(fontWeight: FontWeight.bold)),
+        isActive: _currentStep >= steps.length,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            InkWell(
+              onTap: () => _selectDate('existing_start_date'),
+              child: IgnorePointer(
+                child: _buildTextField('existing_start_date', 'Start Date (YYYY-MM-DD)'),
+              ),
+            ),
+            Focus(
+              onFocusChange: (hasFocus) {
+                if (!hasFocus) _calculateEndDate();
+              },
+              child: _buildTextField('existing_duration_months', 'Duration (Months)'),
+            ),
+            IgnorePointer(
+              child: _buildTextField('existing_end_date', 'Calculated End Date'),
+            ),
+          ],
+        ),
+      ));
+    }
+
     // Common Steps (Documents and Review)
     steps.add(Step(
       title: const Text('Upload Documents', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -444,17 +522,47 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
           if (_selectedOption == 3) ...[
             const Text('Upload your existing rent agreement (Optional).', style: TextStyle(color: AppColors.slate600)),
             const SizedBox(height: 24),
-            _buildUploadButton('Rent Agreement PDF', false),
+            _buildUploadButton('Rent Agreement PDF'),
           ] else ...[
-            const Text('Upload the required documents below.', style: TextStyle(color: AppColors.slate600)),
+            const Text('Enter names and upload documents below.', style: TextStyle(color: AppColors.slate600)),
             const SizedBox(height: 24),
-            _buildUploadButton('Owner Aadhaar', true),
-            _buildUploadButton('Owner PAN', false),
+            
+            const Text('Owner Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 8),
+            _buildTextField('owner_name', 'Owner Name'),
+            _buildUploadButton('Owner Aadhaar', allowMultiple: false),
+            _buildUploadButton('Owner PAN', allowMultiple: false),
+            for (int i = 1; i <= _coOwnerCount; i++) ...[
+              const Divider(height: 16),
+              Text('Co-Owner $i', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              _buildTextField('co_owner_${i}_name', 'Co-Owner $i Name'),
+              _buildUploadButton('Co-Owner $i Aadhaar', allowMultiple: false),
+              _buildUploadButton('Co-Owner $i PAN', allowMultiple: false),
+            ],
+            TextButton.icon(onPressed: () => setState(() => _coOwnerCount++), icon: const Icon(Icons.add), label: const Text('Add Co-Owner')),
             const Divider(height: 32),
-            _buildUploadButton('Tenant Aadhaar', false),
-            _buildUploadButton('Tenant PAN', false),
+            
+            const Text('Tenant Details', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 8),
+            _buildTextField('tenant_name', 'Tenant Name'),
+            _buildUploadButton('Tenant Aadhaar', allowMultiple: false),
+            _buildUploadButton('Tenant PAN', allowMultiple: false),
+            for (int i = 1; i <= _coTenantCount; i++) ...[
+              const Divider(height: 16),
+              Text('Co-Tenant $i', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              _buildTextField('co_tenant_${i}_name', 'Co-Tenant $i Name'),
+              _buildUploadButton('Co-Tenant $i Aadhaar', allowMultiple: false),
+              _buildUploadButton('Co-Tenant $i PAN', allowMultiple: false),
+            ],
+            TextButton.icon(onPressed: () => setState(() => _coTenantCount++), icon: const Icon(Icons.add), label: const Text('Add Co-Tenant')),
             const Divider(height: 32),
-            _buildUploadButton('Electricity Bill', false),
+            
+            _buildUploadButton('Witness 1 Aadhaar'),
+            _buildUploadButton('Witness 2 Aadhaar'),
+            const Divider(height: 32),
+            _buildUploadButton('Electricity Bill'),
           ],
         ],
       ),
@@ -516,7 +624,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     );
   }
 
-  Widget _buildUploadButton(String label, bool uploaded) {
+  Widget _buildUploadButton(String label, {bool allowMultiple = false}) {
+    final uploaded = _uploadedFiles.containsKey(label);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -524,9 +633,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         children: [
           Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
           ElevatedButton.icon(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Picking $label (Mock)...')));
-            },
+            onPressed: () => _pickFile(label, allowMultiple: allowMultiple),
             icon: Icon(uploaded ? Icons.check_circle : Icons.upload_file, size: 16, color: uploaded ? Colors.green : Colors.grey),
             label: Text(uploaded ? 'Uploaded' : 'Select File', style: const TextStyle(fontSize: 12)),
             style: ElevatedButton.styleFrom(

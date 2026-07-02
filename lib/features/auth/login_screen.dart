@@ -56,12 +56,16 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            Widget loginForm = Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 450),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(24),
                   child: Image.network(
@@ -140,8 +144,35 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ],
             ),
+            ),
           ),
-        ),
+        );
+        
+        if (constraints.maxWidth > 800) {
+          return Row(
+            children: [
+              Expanded(
+                flex: 5,
+                child: Container(
+                  color: const Color(0xFF0F172A),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(40),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset('assets/images/hero_screenshot.png', fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(flex: 4, child: loginForm),
+            ],
+          );
+        }
+        return loginForm;
+      },
+    ),
       ),
     );
   }

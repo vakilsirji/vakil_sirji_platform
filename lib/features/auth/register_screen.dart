@@ -147,7 +147,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           prefixIcon: Icon(Icons.badge_outlined),
                           border: OutlineInputBorder(),
                         ),
-                        items: ['Owner', 'Tenant'].map((role) {
+                        items: ['Owner', 'Tenant', 'Staff'].map((role) {
                           return DropdownMenuItem(value: role, child: Text(role));
                         }).toList(),
                         onChanged: (val) {

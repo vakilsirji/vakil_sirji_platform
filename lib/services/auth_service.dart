@@ -36,7 +36,7 @@ class AuthService extends ChangeNotifier {
         email: response['email'] ?? '',
         mobile: response['mobile'] ?? '',
         role: UserRole.values.firstWhere(
-          (e) => e.toString().split('.').last == (response['role'] ?? 'owner'), 
+          (e) => e.toString().split('.').last.toLowerCase() == (response['role']?.toString().toLowerCase() ?? 'owner'), 
           orElse: () => UserRole.owner
         ),
         joinedDate: response['joined_date'] ?? DateTime.now().toIso8601String(),

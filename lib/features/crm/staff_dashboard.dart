@@ -18,6 +18,20 @@ class StaffDashboardScreen extends StatefulWidget {
 
 class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
   int _currentIndex = 0;
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authService = context.watch<AuthService>();
+    final dbService = context.read<DatabaseService>();
+    if (authService.userProfile != null && !_initialized) {
+      _initialized = true;
+      if (!dbService.isLoading) {
+        Future.microtask(() => dbService.fetchAdminDashboardData());
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +39,21 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     final roleName = userProfile?.role.name.toUpperCase() ?? 'STAFF';
 
     final dbService = context.watch<DatabaseService>();
+    if (dbService.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.amber),
+              SizedBox(height: 16),
+              Text('Syncing with GharBook Servers...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     final cases = dbService.cases;
 
     final pages = [
