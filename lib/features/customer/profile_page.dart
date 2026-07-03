@@ -6,6 +6,7 @@ import '../../services/auth_service.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatelessWidget {
+  final UserProfile user;
   final bool isStandalone;
 
   const ProfilePage({super.key, required this.user, this.isStandalone = false});
