@@ -199,11 +199,11 @@ class OverviewPage extends StatelessWidget {
         _buildActionCard(Icons.person_add, 'Add Tenant', Colors.blue.shade50, Colors.blue.shade700, () {
           _showAddTenantDialog(context);
         }),
-        _buildActionCard(Icons.edit_document, 'New Agreement', Colors.amber.shade50, Colors.amber.shade700, () {
+        _buildActionCard(Icons.upload_file, 'Record Existing Agreement', Colors.amber.shade50, Colors.amber.shade700, () {
           if (onNavigateToTab != null) onNavigateToTab!(1);
         }),
-        _buildActionCard(Icons.support_agent, 'Contact Us', Colors.purple.shade50, Colors.purple.shade700, () {
-          _showContactUs(context);
+        _buildActionCard(Icons.edit_document, 'Create Agreement', Colors.purple.shade50, Colors.purple.shade700, () {
+          if (onNavigateToTab != null) onNavigateToTab!(1);
         }),
       ],
     );
@@ -334,45 +334,14 @@ class OverviewPage extends StatelessWidget {
           const SizedBox(height: 4),
           const Text('Premium Customer Support', style: TextStyle(color: AppColors.slate400, fontSize: 12)),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final Uri emailLaunchUri = Uri(
-                      scheme: 'mailto',
-                      path: 'vakilsirji24x7@gmail.com',
-                      queryParameters: {'subject': 'Support Request - GharBook Platform'},
-                    );
-                    if (!await launchUrl(emailLaunchUri)) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not open email app')));
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.email, size: 16, color: Color(0xFF0F172A)),
-                  label: const Text('Email Us', style: TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, elevation: 0, padding: const EdgeInsets.symmetric(vertical: 12)),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final String message = Uri.encodeComponent("Hello GharBook! I need some assistance with my app / agreements.");
-                    final Uri url = Uri.parse('https://wa.me/912269719106?text=$message');
-                    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: const Text('Could not open WhatsApp')));
-                      }
-                    }
-                  },
-                  icon: const Icon(Icons.chat, size: 16, color: Colors.white),
-                  label: const Text('WhatsApp', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green, elevation: 0, padding: const EdgeInsets.symmetric(vertical: 12)),
-                ),
-              ),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => _showContactUs(context),
+              icon: const Icon(Icons.support_agent, color: Colors.white),
+              label: const Text('Contact Us', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueAccent, elevation: 0, padding: const EdgeInsets.symmetric(vertical: 12)),
+            ),
           )
         ],
       ),
