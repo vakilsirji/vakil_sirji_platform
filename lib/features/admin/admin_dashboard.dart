@@ -37,8 +37,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     if (authService.userProfile != null && !_initialized) {
       _currentUser = authService.userProfile!;
       _initialized = true;
-      if (dbService.properties.isEmpty && !dbService.isLoading) {
-        Future.microtask(() => dbService.fetchAdminDashboardData());
+      if (!dbService.isLoading) {
+        Future.microtask(() {
+          dbService.clearData();
+          dbService.fetchAdminDashboardData();
+        });
       }
     }
   }

@@ -27,6 +27,19 @@ class DatabaseService extends ChangeNotifier {
 
   bool isLoading = false;
 
+  void clearData() {
+    properties.clear();
+    tenants.clear();
+    cases.clear();
+    leads.clear();
+    clients.clear();
+    documents.clear();
+    payments.clear();
+    currentTenantProperty = null;
+    currentTenantInfo = null;
+    notifyListeners();
+  }
+
   // --- FETCH DATA FOR CUSTOMER DASHBOARD ---
   Future<void> fetchCustomerDashboardData(String userId) async {
     isLoading = true;

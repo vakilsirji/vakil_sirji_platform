@@ -26,7 +26,10 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
     super.didChangeDependencies();
     if (!_isInit) {
       _currentUser = context.read<AuthService>().userProfile!;
-      context.read<DatabaseService>().fetchTenantDashboardData(_currentUser.mobile);
+      Future.microtask(() {
+        context.read<DatabaseService>().clearData();
+        context.read<DatabaseService>().fetchTenantDashboardData(_currentUser.mobile);
+      });
       _isInit = true;
     }
   }
@@ -79,7 +82,7 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white, size: 24),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user: _currentUser)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user: _currentUser, isStandalone: true)));
             },
           ),
           const SizedBox(width: 8),

@@ -6,13 +6,13 @@ import '../../services/auth_service.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatelessWidget {
-  final UserProfile user;
+  final bool isStandalone;
 
-  const ProfilePage({super.key, required this.user});
+  const ProfilePage({super.key, required this.user, this.isStandalone = false});
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
+    Widget content = SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
@@ -107,6 +107,19 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
     );
+
+    if (isStandalone) {
+      return Scaffold(
+        backgroundColor: AppColors.slate50,
+        appBar: AppBar(
+          title: const Text('My Profile', style: TextStyle(color: Colors.white, fontSize: 16)),
+          backgroundColor: const Color(0xFF0F172A),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: content,
+      );
+    }
+    return content;
   }
 
   Widget _buildSectionHeader(String title) {

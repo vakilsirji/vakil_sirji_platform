@@ -43,8 +43,11 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
       _currentUser = authService.userProfile!;
       _initialized = true;
       // Fetch live data if not already loading
-      if (dbService.properties.isEmpty && !dbService.isLoading) {
-        Future.microtask(() => dbService.fetchCustomerDashboardData(_currentUser.id));
+      if (!dbService.isLoading) {
+        Future.microtask(() {
+          dbService.clearData();
+          dbService.fetchCustomerDashboardData(_currentUser.id);
+        });
       }
     }
   }
@@ -250,7 +253,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           IconButton(
             icon: const Icon(Icons.account_circle, color: Colors.white, size: 24),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user: _currentUser)));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user: _currentUser, isStandalone: true)));
             },
           ),
           const SizedBox(width: 8),

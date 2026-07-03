@@ -28,7 +28,10 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     if (authService.userProfile != null && !_initialized) {
       _initialized = true;
       if (!dbService.isLoading) {
-        Future.microtask(() => dbService.fetchAdminDashboardData());
+        Future.microtask(() {
+          dbService.clearData();
+          dbService.fetchAdminDashboardData();
+        });
       }
     }
   }
