@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../models/legal_case.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'case_timeline_sheet.dart';
 
 class CasesPage extends StatelessWidget {
   final List<LegalCase> cases;
@@ -45,7 +46,12 @@ class CasesPage extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
-                  // TODO: View case details/timeline
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (ctx) => CaseTimelineSheet(legalCase: c),
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(16),
