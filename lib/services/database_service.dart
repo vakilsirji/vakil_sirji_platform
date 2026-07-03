@@ -33,9 +33,9 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await _fetchProperties(userId);
       await Future.wait([
-        _fetchProperties(userId),
-        _fetchTenants(), // Ideally filter by properties, but fetching all for demo
+        _fetchTenants(), 
         _fetchCases(userId),
         _fetchDocuments(),
         _fetchPayments(),
@@ -116,9 +116,9 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
 
     try {
+      await _fetchAllProperties();
       await Future.wait([
-        _fetchAllProperties(),
-        _fetchTenants(), 
+        _fetchTenants(fetchAll: true), 
         _fetchAllCases(),
         _fetchAllLeads(),
         _fetchAllClients(),
@@ -194,10 +194,10 @@ class DatabaseService extends ChangeNotifier {
     )).toList();
   }
 
-  Future<void> _fetchTenants() async {
+  Future<void> _fetchTenants({bool fetchAll = false}) async {
     final response = await _supabase.from('tenants').select();
 
-    tenants = (response as List).map((json) => Tenant(
+    final fetchedTenants = (response as List).map((json) => Tenant(
       id: json['id'],
       name: json['name'] ?? '',
       email: json['email'] ?? '',
@@ -212,6 +212,13 @@ class DatabaseService extends ChangeNotifier {
       moveInDate: json['move_in_date'],
       moveOutDate: json['move_out_date'],
     )).toList();
+
+    if (!fetchAll) {
+      final propertyIds = properties.map((p) => p.id).toSet();
+      tenants = fetchedTenants.where((t) => t.propertyId != null && propertyIds.contains(t.propertyId)).toList();
+    } else {
+      tenants = fetchedTenants;
+    }
   }
 
   // --- ADD NEW PROPERTY ---
