@@ -20,51 +20,39 @@ class TenantsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: onAddTenant != null
-          ? FloatingActionButton.extended(
-              onPressed: onAddTenant,
-              backgroundColor: const Color(0xFF0F172A),
-              icon: const Icon(Icons.person_add, color: Colors.white),
-              label: const Text(
-                'Add Tenant',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : null,
-      body: tenants.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.group_outlined,
-                    size: 60,
-                    color: AppColors.slate300,
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No tenants found.',
-                    style: TextStyle(color: AppColors.slate500),
-                  ),
-                  const SizedBox(height: 8),
-                  if (onAddTenant != null)
-                    ElevatedButton(
-                      onPressed: onAddTenant,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0F172A),
+      body: Stack(
+        children: [
+          tenants.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.group_outlined,
+                        size: 60,
+                        color: AppColors.slate300,
                       ),
-                      child: const Text(
-                        'Add Your First Tenant',
-                        style: TextStyle(color: Colors.white),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'No tenants found.',
+                        style: TextStyle(color: AppColors.slate500),
                       ),
-                    ),
-                ],
-              ),
-            )
-          : ListView.builder(
+                      const SizedBox(height: 8),
+                      if (onAddTenant != null)
+                        ElevatedButton(
+                          onPressed: onAddTenant,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F172A),
+                          ),
+                          child: const Text(
+                            'Add Your First Tenant',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: tenants.length,
               itemBuilder: (context, index) {
@@ -271,7 +259,26 @@ class TenantsPage extends StatelessWidget {
                   ),
                 );
               },
+              ),
+          if (onAddTenant != null && tenants.isNotEmpty)
+            Positioned(
+              bottom: 120.0,
+              right: 16.0,
+              child: FloatingActionButton.extended(
+                onPressed: onAddTenant,
+                backgroundColor: const Color(0xFF0F172A),
+                icon: const Icon(Icons.person_add, color: Colors.white),
+                label: const Text(
+                  'Add Tenant',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ),
+        ],
+      ),
     );
   }
 

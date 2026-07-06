@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants.dart';
 import '../../models/legal_case.dart';
 import '../../services/database_service.dart';
+import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -249,47 +250,130 @@ class _ProcessCaseScreenState extends State<ProcessCaseScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    ...widget.legalCase.details!.entries
-                        .where(
-                          (e) =>
+                    ...() {
+                      int getSortWeight(String key) {
+                        int groupWeight = 900;
+                        if (key.startsWith('property') || key.startsWith('prop_')) groupWeight = 100;
+                        else if (key.startsWith('owner') || key.startsWith('co_owner')) groupWeight = 200;
+                        else if (key.startsWith('tenant') || key.startsWith('co_tenant')) groupWeight = 300;
+                        else if (key.startsWith('w1_')) groupWeight = 400;
+                        else if (key.startsWith('w2_')) groupWeight = 500;
+                        else if (key.contains('rent') || key.contains('deposit') || key.contains('date') || key.contains('duration')) groupWeight = 600;
+
+                        int fieldWeight = 99;
+                        if (key.contains('name')) fieldWeight = 1;
+                        else if (key.contains('address')) fieldWeight = 2;
+                        else if (key.contains('pan')) fieldWeight = 3;
+                        else if (key.contains('age')) fieldWeight = 4;
+                        else if (key.contains('mobile')) fieldWeight = 5;
+
+                        return groupWeight + fieldWeight;
+                      }
+
+                      final db = context.read<DatabaseService>();
+                      final augmentedDetails = Map<String, dynamic>.from(widget.legalCase.details ?? {});
+
+                      if (widget.legalCase.propertyId != null) {
+                        try {
+                          final p = db.properties.firstWhere((p) => p.id == widget.legalCase.propertyId);
+                          augmentedDetails.putIfAbsent('property_address', () => p.address);
+                          augmentedDetails.putIfAbsent('property_city', () => p.city);
+                          augmentedDetails.putIfAbsent('property_state', () => p.state);
+                          augmentedDetails.putIfAbsent('property_pincode', () => p.pinCode);
+                          if (p.rentAmount > 0) augmentedDetails.putIfAbsent('rent_amount', () => p.rentAmount.toString());
+                          if (p.depositAmount > 0) augmentedDetails.putIfAbsent('deposit_amount', () => p.depositAmount.toString());
+                          
+                          try {
+                            final c = db.clients.firstWhere((c) => c.id == p.ownerId);
+                            augmentedDetails.putIfAbsent('owner_name', () => c.name);
+                            augmentedDetails.putIfAbsent('owner_mobile', () => c.mobile);
+                          } catch (_) {}
+                        } catch (_) {}
+                      }
+
+                      if (widget.legalCase.tenantId != null) {
+                        try {
+                          final t = db.tenants.firstWhere((t) => t.id == widget.legalCase.tenantId);
+                          augmentedDetails.putIfAbsent('tenant_name', () => t.name);
+                          augmentedDetails.putIfAbsent('tenant_mobile', () => t.mobile);
+                          if (t.email.isNotEmpty) augmentedDetails.putIfAbsent('tenant_email', () => t.email);
+                          if (t.pan.isNotEmpty) augmentedDetails.putIfAbsent('tenant_pan', () => t.pan);
+                          if (t.aadhaar.isNotEmpty) augmentedDetails.putIfAbsent('tenant_aadhaar', () => t.aadhaar);
+                        } catch (_) {}
+                      }
+
+                      final entries = augmentedDetails.entries
+                          .where((e) =>
                               e.key != 'uploaded_files' &&
                               e.key != 'property_id' &&
                               e.key != 'tenant_id' &&
-                              e.key != 'is_existing_agreement',
-                        )
-                        .where((e) => e.value.toString().isNotEmpty)
-                        .map(
-                          (e) => Padding(
-                            padding: const EdgeInsets.only(bottom: 4),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: 140,
-                                  child: Text(
-                                    '${_formatKey(e.key)}:',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                      color: AppColors.slate500,
-                                    ),
+                              e.key != 'is_existing_agreement' &&
+                              e.value.toString().isNotEmpty)
+                          .toList()
+                        ..sort((a, b) {
+                          final wA = getSortWeight(a.key);
+                          final wB = getSortWeight(b.key);
+                          if (wA != wB) return wA.compareTo(wB);
+                          return a.key.compareTo(b.key);
+                        });
+
+                      return entries.map(
+                        (e) => Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: 140,
+                                child: Text(
+                                  '${_formatKey(e.key)}:',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                    color: AppColors.slate500,
                                   ),
                                 ),
-                                Expanded(
-                                  child: Text(
-                                    e.value.toString(),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 12,
-                                      color: Color(0xFF0F172A),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Flexible(
+                                      child: SelectableText(
+                                        e.value.toString(),
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Color(0xFF0F172A),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(width: 4),
+                                    InkWell(
+                                      onTap: () {
+                                        Clipboard.setData(ClipboardData(text: e.value.toString()));
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                            content: Text('Copied ${_formatKey(e.key)} to clipboard'),
+                                            duration: const Duration(seconds: 1),
+                                          ),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(4),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(2.0),
+                                        child: Icon(Icons.copy, size: 14, color: Colors.blue),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        )
-                        .toList(),
+                        ),
+                      );
+                    }(),
                   ],
                   if (widget.legalCase.details != null &&
                       widget.legalCase.details!['uploaded_files'] != null) ...[
@@ -364,13 +448,35 @@ class _ProcessCaseScreenState extends State<ProcessCaseScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 8),
-                                        const Text(
-                                          'This is a mock document viewer for the MVP. In production, this will render the actual file from Supabase Storage.',
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
+                                        const SizedBox(height: 16),
+                                        ElevatedButton.icon(
+                                          onPressed: () async {
+                                            final urlString = e.value.toString();
+                                            if (!urlString.startsWith('http')) {
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text('This is an old mock document. Create a new case to view real uploads!'),
+                                                    backgroundColor: Colors.amber,
+                                                  ),
+                                                );
+                                              }
+                                              return;
+                                            }
+                                            
+                                            final uri = Uri.parse(urlString);
+                                            try {
+                                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                            } catch (e) {
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Could not open document.')),
+                                                );
+                                              }
+                                            }
+                                          },
+                                          icon: const Icon(Icons.open_in_new),
+                                          label: const Text('View Original Document'),
                                         ),
                                       ],
                                     ),

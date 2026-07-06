@@ -40,6 +40,46 @@ class DatabaseService extends ChangeNotifier {
     notifyListeners();
   }
 
+  RealtimeChannel? _adminRealtimeChannel;
+
+  void setupAdminRealtime() {
+    if (_adminRealtimeChannel != null) return;
+
+    _adminRealtimeChannel = _supabase
+        .channel('public:admin_changes')
+        .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'cases',
+            callback: (payload) {
+              refreshAdminDashboardBackground();
+            })
+        .onPostgresChanges(
+            event: PostgresChangeEvent.all,
+            schema: 'public',
+            table: 'service_requests',
+            callback: (payload) {
+              refreshAdminDashboardBackground();
+            })
+        .subscribe();
+  }
+
+  Future<void> refreshAdminDashboardBackground() async {
+    try {
+      await _fetchAllProperties();
+      await Future.wait([
+        _fetchTenants(fetchAll: true),
+        _fetchAllCases(),
+        _fetchAllLeads(),
+        _fetchAllClients(),
+        _fetchDocuments(),
+        _fetchPayments(),
+      ]);
+    } catch (e) {
+      debugPrint('Error in background refresh: $e');
+    }
+  }
+
   // --- FETCH DATA FOR CUSTOMER DASHBOARD ---
   Future<void> fetchCustomerDashboardData(String userId) async {
     isLoading = true;
@@ -569,6 +609,11 @@ class DatabaseService extends ChangeNotifier {
 
     cases = (response as List).map((json) {
       final sr = json['service_requests'];
+      final details = sr['details'] as Map<String, dynamic>?;
+      String cName = 'Tenant/Owner';
+      if (details != null && details['owner_name'] != null && details['tenant_name'] != null) {
+        cName = '${details['owner_name']} / ${details['tenant_name']}';
+      }
       return LegalCase(
         id: json['id'],
         requestId: sr['id'],
@@ -576,7 +621,7 @@ class DatabaseService extends ChangeNotifier {
         customerId: sr['customer_id'],
         propertyId: sr['property_id'],
         tenantId: sr['tenant_id'],
-        clientName: 'Tenant/Owner', // Or lookup actual name if we had it
+        clientName: cName,
         clientMobile: '',
         serviceType: sr['service_type'],
         status: _parseStatus(json['status']),
@@ -830,6 +875,30 @@ class DatabaseService extends ChangeNotifier {
     }
   }
 
+  // --- DELETE ALL CASES (ADMIN/STAFF FUNCTION) ---
+  Future<void> deleteAllCases() async {
+    try {
+      await _supabase.from('service_requests').delete().neq('id', 'dummy');
+      await _supabase.from('cases').delete().neq('id', 'dummy');
+      cases.clear();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error deleting cases: $e');
+    }
+  }
+
+  // --- DELETE INDIVIDUAL CASE ---
+  Future<void> deleteCrmCase(String caseId, String serviceRequestId) async {
+    try {
+      await _supabase.from('cases').delete().eq('id', caseId);
+      await _supabase.from('service_requests').delete().eq('id', serviceRequestId);
+      cases.removeWhere((c) => c.id == caseId);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error deleting case: $e');
+    }
+  }
+
   // --- CREATE NEW SERVICE REQUEST ---
   Future<void> createServiceRequest(
     String customerId,
@@ -839,10 +908,40 @@ class DatabaseService extends ChangeNotifier {
     Map<String, dynamic>? manualDetails,
   }) async {
     try {
+      String finalPropertyId = propertyId;
+      String finalTenantId = tenantId;
+
+      // Auto-create property if manual details provided
+      if (finalPropertyId.isEmpty && manualDetails != null && manualDetails.containsKey('property_address')) {
+        final rentAmount = double.tryParse(manualDetails['existing_rent_amount']?.toString() ?? '0') ?? 0.0;
+        final depositAmount = double.tryParse(manualDetails['existing_deposit_amount']?.toString() ?? '0') ?? 0.0;
+        final newProp = await _supabase.from('properties').insert({
+          'owner_id': customerId,
+          'name': manualDetails['property_name'] ?? 'New Property',
+          'address': manualDetails['property_address'] ?? '',
+          'city': manualDetails['property_city'] ?? '',
+          'state': manualDetails['property_state'] ?? '',
+          'pin_code': manualDetails['property_pincode'] ?? '',
+          'rent_amount': rentAmount,
+          'deposit_amount': depositAmount,
+        }).select().single();
+        finalPropertyId = newProp['id'];
+      }
+
+      // Auto-create tenant if manual details provided
+      if (finalTenantId.isEmpty && manualDetails != null && manualDetails.containsKey('tenant_name')) {
+        final newTenant = await _supabase.from('tenants').insert({
+          'property_id': finalPropertyId.isNotEmpty ? finalPropertyId : null,
+          'name': manualDetails['tenant_name'] ?? 'New Tenant',
+          'mobile': manualDetails['tenant_mobile'] ?? '',
+        }).select().single();
+        finalTenantId = newTenant['id'];
+      }
+
       final detailsJson = <String, dynamic>{
         ...?manualDetails,
-        'property_id': propertyId,
-        'tenant_id': tenantId,
+        'property_id': finalPropertyId,
+        'tenant_id': finalTenantId,
       };
 
       // 1. Insert Service Request
@@ -1085,5 +1184,11 @@ class DatabaseService extends ChangeNotifier {
       debugPrint('Error generating invoice: $e');
       rethrow;
     }
+  }
+
+  @override
+  void dispose() {
+    _adminRealtimeChannel?.unsubscribe();
+    super.dispose();
   }
 }

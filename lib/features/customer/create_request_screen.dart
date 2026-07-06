@@ -6,6 +6,7 @@ import '../../models/tenant.dart';
 import '../../models/user_profile.dart';
 import '../../services/database_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'overview_page.dart';
 
 class CreateRequestScreen extends StatefulWidget {
@@ -48,6 +49,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   int _coOwnerCount = 0;
   int _coTenantCount = 0;
   late List<Tenant> _tenants;
+  bool _isManualPropertyEntry = false;
 
   final List<String> _services = ['Rent Agreement', 'Agreement Renewal'];
 
@@ -56,8 +58,12 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     super.initState();
     _selectedOption = widget.initialIsExisting ? 3 : 2;
     _tenants = List<Tenant>.from(widget.tenants);
-    if (widget.properties.isNotEmpty)
+    if (widget.properties.isNotEmpty) {
       _selectedPropertyId = widget.properties.first.id;
+      _autoFillFromProperty(widget.properties.first);
+    } else {
+      _isManualPropertyEntry = true;
+    }
     if (_tenants.isNotEmpty) _selectedTenantId = _tenants.first.id;
 
     // Auto-fill Owner details
@@ -75,20 +81,39 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   final Map<String, TextEditingController> _ctrls = {};
   final Map<String, String> _uploadedFiles = {};
 
+  bool _isUploading = false;
+
   Future<void> _pickFile(String label, {bool allowMultiple = false}) async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf', 'png', 'jpg', 'jpeg'],
       allowMultiple: allowMultiple,
+      withData: true,
     );
     if (result != null && result.files.isNotEmpty) {
-      setState(() {
-        if (allowMultiple) {
-          _uploadedFiles[label] = result.files.map((e) => e.name).join(', ');
-        } else {
-          _uploadedFiles[label] = result.files.first.name;
+      setState(() => _isUploading = true);
+      try {
+        List<String> urls = [];
+        for (var file in result.files) {
+          if (file.bytes != null) {
+            final path = 'customer_uploads/${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+            await Supabase.instance.client.storage.from('agreements').uploadBinary(path, file.bytes!);
+            final publicUrl = Supabase.instance.client.storage.from('agreements').getPublicUrl(path);
+            urls.add(publicUrl);
+          }
         }
-      });
+        if (urls.isNotEmpty) {
+          setState(() {
+            _uploadedFiles[label] = urls.join(', ');
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
+        }
+      } finally {
+        setState(() => _isUploading = false);
+      }
     }
   }
 
@@ -100,13 +125,25 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   void _submit() {
     Map<String, dynamic> manualDetails = {};
 
-    // 1. Property Details
+    // 1. Property Details (from new Step 1)
     if (_selectedPropertyId != null) {
       try {
         final prop = widget.properties.firstWhere((p) => p.id == _selectedPropertyId);
         manualDetails['property_name'] = prop.name;
-        manualDetails['property_address'] = prop.address;
       } catch (_) {}
+    }
+    // Property address from the form fields (covers both pre-fill and manual)
+    if (_ctrls.containsKey('prop_address') && _ctrls['prop_address']!.text.isNotEmpty) {
+      manualDetails['property_address'] = _ctrls['prop_address']!.text;
+    }
+    if (_ctrls.containsKey('prop_city') && _ctrls['prop_city']!.text.isNotEmpty) {
+      manualDetails['property_city'] = _ctrls['prop_city']!.text;
+    }
+    if (_ctrls.containsKey('prop_state') && _ctrls['prop_state']!.text.isNotEmpty) {
+      manualDetails['property_state'] = _ctrls['prop_state']!.text;
+    }
+    if (_ctrls.containsKey('prop_pincode') && _ctrls['prop_pincode']!.text.isNotEmpty) {
+      manualDetails['property_pincode'] = _ctrls['prop_pincode']!.text;
     }
 
     // 2. Owner Details
@@ -128,7 +165,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
       manualDetails['tenant_name'] = _ctrls['tenant_name']!.text;
     }
 
-    // 4. Agreement Start and End
+    // 4. Agreement Start and End (from new Step 2)
     if (_ctrls.containsKey('existing_start_date') && _ctrls['existing_start_date']!.text.isNotEmpty) {
       manualDetails['existing_start_date'] = _ctrls['existing_start_date']!.text;
     }
@@ -136,7 +173,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
       manualDetails['existing_end_date'] = _ctrls['existing_end_date']!.text;
     }
 
-    // 5. Rent and Deposit
+    // 5. Rent and Deposit (from new Step 2)
     if (_ctrls.containsKey('existing_rent_amount') && _ctrls['existing_rent_amount']!.text.isNotEmpty) {
       manualDetails['existing_rent_amount'] = _ctrls['existing_rent_amount']!.text;
     }
@@ -147,7 +184,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     // Add all remaining filled controllers that weren't already added
     if (_selectedOption == 1 || _selectedOption == 3 || _selectedOption == 2) {
       _ctrls.forEach((key, ctrl) {
-        if (!manualDetails.containsKey(key) && ctrl.text.isNotEmpty) {
+        if (!key.startsWith('prop_') && !manualDetails.containsKey(key) && ctrl.text.isNotEmpty) {
           manualDetails[key] = ctrl.text;
         }
       });
@@ -189,32 +226,43 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
       setState(() {
         _getCtrl(ctrlKey).text =
             "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
-        _calculateEndDate();
       });
+      _calculateEndDate();
     }
   }
 
   void _calculateEndDate() {
-    final startText = _getCtrl('existing_start_date').text;
-    final durationText = _getCtrl('existing_duration_months').text;
-    if (startText.isNotEmpty && durationText.isNotEmpty) {
+    final startStr = _getCtrl('existing_start_date').text;
+    final durationStr = _getCtrl('existing_duration_months').text;
+    
+    if (startStr.isNotEmpty && durationStr.isNotEmpty) {
       try {
-        final parts = startText.split('-');
+        final parts = startStr.split('-');
         if (parts.length == 3) {
-          final startDate = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
-          final months = int.parse(durationText);
-          final endDate = DateTime(
-            startDate.year,
-            startDate.month + months,
-            startDate.day,
+          final startDate = DateTime(
+            int.parse(parts[2]),
+            int.parse(parts[1]),
+            int.parse(parts[0]),
           );
+          final months = int.parse(durationStr);
+          // Calculate end date: Add months, subtract 1 day
+          final endDate = DateTime(startDate.year, startDate.month + months, startDate.day - 1);
           _getCtrl('existing_end_date').text =
               "${endDate.day.toString().padLeft(2, '0')}-${endDate.month.toString().padLeft(2, '0')}-${endDate.year}";
         }
       } catch (e) {
-        // Ignored
+        // ignore
       }
     }
+  }
+
+  void _autoFillFromProperty(Property property) {
+    _getCtrl('prop_address').text = property.address;
+    _getCtrl('prop_city').text = property.city;
+    _getCtrl('prop_state').text = property.state;
+    _getCtrl('prop_pincode').text = property.pinCode;
+    _getCtrl('existing_rent_amount').text = property.rentAmount > 0 ? property.rentAmount.toStringAsFixed(0) : '';
+    _getCtrl('existing_deposit_amount').text = property.depositAmount > 0 ? property.depositAmount.toStringAsFixed(0) : '';
   }
 
   @override
@@ -429,6 +477,211 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
       ),
     );
 
+    // STEP 1 (Common): Property Address
+    steps.add(
+      Step(
+        title: const Text(
+          'Property Address',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        isActive: _currentStep >= 1,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Select Property',
+              style: TextStyle(color: AppColors.slate600, fontSize: 12),
+            ),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String?>(
+              value: _isManualPropertyEntry ? null : _selectedPropertyId,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: AppColors.slate50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.slate200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                    color: Color(0xFF0F172A),
+                    width: 1.5,
+                  ),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
+              ),
+              items: [
+                const DropdownMenuItem<String?>(
+                  value: null,
+                  child: Text(
+                    '✏️  Enter Manually',
+                    style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                ...widget.properties.map(
+                  (p) => DropdownMenuItem(
+                    value: p.id,
+                    child: Text(p.name, overflow: TextOverflow.ellipsis),
+                  ),
+                ),
+              ],
+              onChanged: (val) {
+                setState(() {
+                  if (val == null) {
+                    _isManualPropertyEntry = true;
+                    _selectedPropertyId = null;
+                    _getCtrl('prop_address').clear();
+                    _getCtrl('prop_city').clear();
+                    _getCtrl('prop_state').clear();
+                    _getCtrl('prop_pincode').clear();
+                    _getCtrl('existing_rent_amount').clear();
+                    _getCtrl('existing_deposit_amount').clear();
+                  } else {
+                    _isManualPropertyEntry = false;
+                    _selectedPropertyId = val;
+                    final property = widget.properties.firstWhere((p) => p.id == val);
+                    _autoFillFromProperty(property);
+                    // Also auto-select tenant if property has one
+                    if (property.currentTenantId != null && _tenants.any((t) => t.id == property.currentTenantId)) {
+                      _selectedTenantId = property.currentTenantId;
+                    }
+                  }
+                });
+              },
+            ),
+            if (_selectedPropertyId != null && !_isManualPropertyEntry) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green.shade600, size: 18),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Address pre-filled from selected property. You can edit below.',
+                        style: TextStyle(fontSize: 12, color: Colors.green),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            _buildTextField('prop_address', 'Property Address', maxLines: 2),
+            Row(
+              children: [
+                Expanded(child: _buildTextField('prop_city', 'City')),
+                const SizedBox(width: 12),
+                Expanded(child: _buildTextField('prop_state', 'State')),
+              ],
+            ),
+            _buildTextField('prop_pincode', 'Pin Code'),
+          ],
+        ),
+      ),
+    );
+
+    // STEP 2 (Common): Rent & Agreement Period
+    steps.add(
+      Step(
+        title: const Text(
+          'Rent & Agreement Period',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        isActive: _currentStep >= 2,
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (_selectedPropertyId != null && !_isManualPropertyEntry)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.blue.shade600, size: 16),
+                      const SizedBox(width: 8),
+                      const Expanded(
+                        child: Text(
+                          'Rent & deposit pre-filled from property. Edit if needed.',
+                          style: TextStyle(fontSize: 12, color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildTextField(
+                    'existing_rent_amount',
+                    'Rent Amount (₹)',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildTextField(
+                    'existing_deposit_amount',
+                    'Deposit Amount (₹)',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Agreement Period',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => _selectDate('existing_start_date'),
+              child: IgnorePointer(
+                child: _buildTextField(
+                  'existing_start_date',
+                  'Agreement Start Date',
+                ),
+              ),
+            ),
+            _buildTextField(
+              'existing_duration_months',
+              'Period (in Months)',
+              onChanged: (_) => _calculateEndDate(),
+            ),
+            IgnorePointer(
+              child: _buildTextField(
+                'existing_end_date',
+                'Agreement End Date (Auto-calculated)',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
     if (_selectedOption == 1) {
       // Manual Entry Steps
       steps.add(
@@ -437,7 +690,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
             'Owner & Tenant Details',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          isActive: _currentStep >= 1,
+          isActive: _currentStep >= steps.length,
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -641,7 +894,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
             'Witness Details',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          isActive: _currentStep >= 2,
+          isActive: _currentStep >= steps.length,
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -693,66 +946,17 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         ),
       );
     } else if (_selectedOption == 3) {
-      // Existing Agreement Steps
+      // Existing Agreement Steps — property already selected in Step 1
       steps.add(
         Step(
           title: const Text(
-            'Select Property & Tenant',
+            'Select Tenant',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          isActive: _currentStep >= 1,
+          isActive: _currentStep >= steps.length,
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Property',
-                style: TextStyle(color: AppColors.slate600, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedPropertyId,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.slate50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.slate200),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF0F172A),
-                      width: 1.5,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                ),
-                items: widget.properties
-                    .map(
-                      (p) => DropdownMenuItem(value: p.id, child: Text(p.name)),
-                    )
-                    .toList(),
-                onChanged: (val) {
-                  setState(() {
-                    _selectedPropertyId = val;
-                    // Auto-select tenant if property has one
-                    if (val != null) {
-                      final property = widget.properties.firstWhere((p) => p.id == val);
-                      if (property.currentTenantId != null && widget.tenants.any((t) => t.id == property.currentTenantId)) {
-                        _selectedTenantId = property.currentTenantId;
-                      }
-                    }
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
               const Text(
                 'Tenant (Required)',
                 style: TextStyle(
@@ -925,115 +1129,19 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         ),
       );
 
-      steps.add(
-        Step(
-          title: const Text(
-            'Agreement Details',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          isActive: _currentStep >= 2,
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                onTap: () => _selectDate('existing_start_date'),
-                child: IgnorePointer(
-                  child: _buildTextField(
-                    'existing_start_date',
-                    'Start Date (YYYY-MM-DD)',
-                  ),
-                ),
-              ),
-              Focus(
-                onFocusChange: (hasFocus) {
-                  if (!hasFocus) _calculateEndDate();
-                },
-                child: _buildTextField(
-                  'existing_duration_months',
-                  'Duration (Months)',
-                ),
-              ),
-              IgnorePointer(
-                child: _buildTextField(
-                  'existing_end_date',
-                  'Calculated End Date',
-                ),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      'existing_rent_amount',
-                      'Rent Amount (₹)',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildTextField(
-                      'existing_deposit_amount',
-                      'Deposit (₹)',
-                    ),
-                  ),
-                ],
-              ),
-              _buildTextField(
-                'existing_rent_pay_date',
-                'Rent Pay Date (e.g., 1, 5)',
-              ),
-            ],
-          ),
-        ),
-      );
+      // Agreement Details step removed — rent/deposit/dates are now in common Step 2
     } else {
-      // Delegated Step (Link to Property/Tenant)
+      // Delegated Step — property already selected in Step 1
       steps.add(
         Step(
           title: const Text(
-            'Select Property',
+            'Select Tenant',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-          isActive: _currentStep >= 1,
+          isActive: _currentStep >= steps.length,
           content: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Property',
-                style: TextStyle(color: AppColors.slate600, fontSize: 12),
-              ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
-                value: _selectedPropertyId,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: AppColors.slate50,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.slate200),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF0F172A),
-                      width: 1.5,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16,
-                  ),
-                ),
-                items: widget.properties
-                    .map(
-                      (p) => DropdownMenuItem(value: p.id, child: Text(p.name)),
-                    )
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedPropertyId = val),
-              ),
-              const SizedBox(height: 16),
               const Text(
                 'Tenant (Optional)',
                 style: TextStyle(color: AppColors.slate600, fontSize: 12),
@@ -1124,46 +1232,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
       );
     }
 
-    if (_selectedOption == 1 || _selectedOption == 2) {
-      steps.add(
-        Step(
-          title: const Text(
-            'Agreement Period',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          isActive: _currentStep >= steps.length,
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                onTap: () => _selectDate('existing_start_date'),
-                child: IgnorePointer(
-                  child: _buildTextField(
-                    'existing_start_date',
-                    'Start Date (DD-MM-YYYY)',
-                  ),
-                ),
-              ),
-              Focus(
-                onFocusChange: (hasFocus) {
-                  if (!hasFocus) _calculateEndDate();
-                },
-                child: _buildTextField(
-                  'existing_duration_months',
-                  'Duration (Months)',
-                ),
-              ),
-              IgnorePointer(
-                child: _buildTextField(
-                  'existing_end_date',
-                  'Calculated End Date',
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
+    // Agreement Period step removed — now handled by common Step 2
 
     // Common Steps (Documents and Review)
     if (_selectedOption != 1) {
@@ -1215,6 +1284,14 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                   ),
                 ),
               if (_selectedOption == 1) const SizedBox(height: 24),
+
+              const Text(
+                'Property Proof',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              _buildUploadButton('Property Address Proof (Electric Bill, Index 2, etc.)'),
+              const Divider(height: 32),
 
               const Text(
                 'Owner Details',
@@ -1273,8 +1350,6 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
 
               _buildUploadButton('Witness 1 Aadhaar'),
               _buildUploadButton('Witness 2 Aadhaar'),
-              const Divider(height: 16),
-              _buildUploadButton('Electricity Bill'),
             ],
           ],
         ),
@@ -1345,18 +1420,36 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     return steps;
   }
 
-  Widget _buildTextField(String key, String label, {int maxLines = 1}) {
+  Widget _buildTextField(
+    String key,
+    String label, {
+    int maxLines = 1,
+    void Function(String)? onChanged,
+  }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: _getCtrl(key),
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
+          filled: true,
+          fillColor: AppColors.slate50,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.slate200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.amber, width: 2),
+          ),
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 12,
+            horizontal: 16,
+            vertical: 16,
           ),
         ),
         maxLines: maxLines,
@@ -1367,33 +1460,57 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   Widget _buildUploadButton(String label, {bool allowMultiple = false}) {
     final uploaded = _uploadedFiles.containsKey(label);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
-          ElevatedButton.icon(
-            onPressed: () => _pickFile(label, allowMultiple: allowMultiple),
-            icon: Icon(
-              uploaded ? Icons.check_circle : Icons.upload_file,
-              size: 16,
-              color: uploaded ? Colors.green : Colors.grey,
+      padding: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: () => _pickFile(label, allowMultiple: allowMultiple),
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: uploaded ? Colors.green.shade50 : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: uploaded ? Colors.green.shade300 : AppColors.slate300,
             ),
-            label: Text(
-              uploaded ? 'Uploaded' : 'Select File',
-              style: const TextStyle(fontSize: 12),
-            ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: uploaded
-                  ? Colors.green.shade50
-                  : AppColors.slate100,
-              foregroundColor: uploaded
-                  ? Colors.green.shade700
-                  : AppColors.slate700,
-              elevation: 0,
-            ),
+            boxShadow: [
+              if (!uploaded)
+                BoxShadow(
+                  color: AppColors.slate200.withValues(alpha: 0.5),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
-        ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Row(
+                  children: [
+                    Icon(
+                      uploaded ? Icons.check_circle : Icons.upload_file,
+                      color: uploaded ? Colors.green.shade600 : AppColors.slate500,
+                      size: 24,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: uploaded ? Colors.green.shade700 : AppColors.slate700,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (!uploaded)
+                const Icon(Icons.arrow_forward_ios, size: 14, color: AppColors.slate400),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1440,12 +1557,38 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
         type: StepperType.vertical,
         currentStep: _currentStep,
         onStepContinue: () {
-          if (_currentStep == 1 && _selectedOption == 3) {
-            if (_selectedPropertyId == null || _selectedTenantId == null) {
+          // Validate Property Address step (Step 1)
+          if (_currentStep == 1) {
+            if (_getCtrl('prop_address').text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please enter the property address.'),
+                ),
+              );
+              return;
+            }
+          }
+          // Validate Rent & Agreement Period step (Step 2)
+          if (_currentStep == 2) {
+            if (_getCtrl('existing_rent_amount').text.isEmpty ||
+                _getCtrl('existing_start_date').text.isEmpty ||
+                _getCtrl('existing_duration_months').text.isEmpty ||
+                _getCtrl('existing_end_date').text.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please fill rent, start date, and period.'),
+                ),
+              );
+              return;
+            }
+          }
+          // Validate Tenant selection for Option 3 (now at step 3)
+          if (_currentStep == 3 && _selectedOption == 3) {
+            if (_selectedTenantId == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text(
-                    'Please select both Property and Tenant to activate Rent Hub.',
+                    'Please select a Tenant to activate Rent Hub.',
                   ),
                 ),
               );

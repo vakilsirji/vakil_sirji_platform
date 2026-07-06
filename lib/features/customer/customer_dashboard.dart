@@ -308,6 +308,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         }
       },
       child: Scaffold(
+        extendBody: true,
         backgroundColor: AppColors.slate50,
       appBar: AppBar(
         leading: _currentIndex != 0
@@ -370,30 +371,35 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 800),
-          child: SafeArea(child: pages[_currentIndex]),
+          child: SafeArea(bottom: false, child: pages[_currentIndex]),
         ),
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.slate300.withValues(alpha: 0.3),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: Colors.white,
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 24, left: 16, right: 16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.slate900.withValues(alpha: 0.1),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: BottomNavigationBar(
+              elevation: 0,
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.transparent,
             selectedItemColor: const Color(0xFF0F172A),
             unselectedItemColor: AppColors.slate400,
             selectedLabelStyle: const TextStyle(
@@ -436,68 +442,76 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
           ),
         ),
       ),
-      floatingActionButton: _currentIndex == 1
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                FloatingActionButton.extended(
-                  heroTag: 'fab_record',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreateRequestScreen(
-                          properties: properties,
-                          tenants: tenants,
-                          currentUser: _currentUser,
-                          onSubmit: _addNewCase,
-                          initialIsExisting: true,
-                        ),
-                      ),
-                    );
-                  },
-                  backgroundColor: Colors.blue.shade700,
-                  icon: const Icon(Icons.history_edu, color: Colors.white),
-                  label: const Text(
-                    'Record Existing Agreement',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                FloatingActionButton.extended(
-                  heroTag: 'fab_create',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CreateRequestScreen(
-                          properties: properties,
-                          tenants: tenants,
-                          currentUser: _currentUser,
-                          onSubmit: _addNewCase,
-                          initialIsExisting: false,
-                        ),
-                      ),
-                    );
-                  },
-                  backgroundColor: const Color(0xFF0F172A),
-                  icon: const Icon(Icons.add, color: Colors.amber),
-                  label: const Text(
-                    'Create Agreement',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : null,
+      ),
+      floatingActionButton: _buildFloatingActionButton(),
       ),
     );
+  }
+
+  Widget? _buildFloatingActionButton() {
+    if (_currentIndex == 1) {
+      final dbService = context.read<DatabaseService>();
+      final properties = dbService.properties;
+      final tenants = dbService.tenants;
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'fab_record',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateRequestScreen(
+                    properties: properties,
+                    tenants: tenants,
+                    currentUser: _currentUser,
+                    onSubmit: _addNewCase,
+                    initialIsExisting: true,
+                  ),
+                ),
+              );
+            },
+            backgroundColor: Colors.blue.shade700,
+            icon: const Icon(Icons.history_edu, color: Colors.white),
+            label: const Text(
+              'Record Existing Agreement',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton.extended(
+            heroTag: 'fab_create',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateRequestScreen(
+                    properties: properties,
+                    tenants: tenants,
+                    currentUser: _currentUser,
+                    onSubmit: _addNewCase,
+                  ),
+                ),
+              );
+            },
+            backgroundColor: const Color(0xFF0F172A),
+            icon: const Icon(Icons.add, color: Colors.amber),
+            label: const Text(
+              'Create Agreement',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    return null;
   }
 }

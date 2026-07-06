@@ -64,27 +64,33 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
 
     // Check missing details
     final List<String> missingDetails = [];
+    final uploadedFiles = widget.legalCase.details?['uploaded_files'] as Map<String, dynamic>? ?? {};
 
-    if (widget.legalCase.propertyId == null) {
+    if (widget.legalCase.propertyId == null && widget.legalCase.details?['property_address'] == null) {
       missingDetails.add("Property not selected for this agreement.");
     }
-    if (widget.legalCase.tenantId == null) {
+    if (widget.legalCase.tenantId == null && widget.legalCase.details?['tenant_name'] == null) {
       missingDetails.add("Tenant not selected for this agreement.");
     } else if (tenant != null) {
-      if (tenant.aadhaar.isEmpty)
+      bool hasTenantAadhaarDoc = uploadedFiles.keys.any((k) => k.toLowerCase().contains('tenant aadhaar'));
+      bool hasTenantPanDoc = uploadedFiles.keys.any((k) => k.toLowerCase().contains('tenant pan'));
+
+      if (tenant.aadhaar.isEmpty && !hasTenantAadhaarDoc)
         missingDetails.add("Tenant Aadhaar is missing.");
-      if (tenant.pan.isEmpty) missingDetails.add("Tenant PAN is missing.");
-      if (tenant.currentAddress.isEmpty)
-        missingDetails.add("Tenant Address is missing.");
+      if (tenant.pan.isEmpty && !hasTenantPanDoc) 
+        missingDetails.add("Tenant PAN is missing.");
     }
 
     // Check document based on service type
     bool isRecordExisting =
         widget.legalCase.serviceType.toLowerCase().contains("record") ||
         widget.legalCase.serviceType.toLowerCase().contains("existing");
+        
+    bool hasRentAgreementDoc = uploadedFiles.keys.any((k) => k.toLowerCase().contains('rent agreement'));
+
     if (isRecordExisting &&
-        (widget.legalCase.documentUrl == null ||
-            widget.legalCase.documentUrl!.isEmpty)) {
+        (widget.legalCase.documentUrl == null || widget.legalCase.documentUrl!.isEmpty) &&
+        !hasRentAgreementDoc) {
       missingDetails.add("Agreement PDF document not uploaded.");
     }
 
@@ -267,7 +273,7 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
             ],
 
             if (widget.legalCase.documentUrl != null &&
-                widget.legalCase.documentUrl!.isNotEmpty)
+                widget.legalCase.documentUrl!.isNotEmpty) ...[
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -283,7 +289,50 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
                 ),
-              )
+              ),
+              if (widget.legalCase.status == AgreementStatus.clientApproval ||
+                  widget.legalCase.status == AgreementStatus.draftReady) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      try {
+                        await context.read<DatabaseService>().updateCaseStatus(
+                          widget.legalCase.id,
+                          'Biometric Scheduled',
+                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Draft Approved! Admin has been notified.'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Failed to approve draft.')),
+                          );
+                        }
+                      }
+                    },
+                    icon: const Icon(Icons.check_circle, color: Colors.white),
+                    label: const Text(
+                      'Approve Draft & Proceed',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade600,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ]
             else if (widget.onUploadDocument != null)
               SizedBox(
                 width: double.infinity,

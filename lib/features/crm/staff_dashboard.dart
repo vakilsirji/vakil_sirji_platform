@@ -31,6 +31,7 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         Future.microtask(() {
           dbService.clearData();
           dbService.fetchAdminDashboardData();
+          dbService.setupAdminRealtime();
         });
       }
     }
@@ -57,11 +58,14 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
       );
     }
 
-    final cases = dbService.cases;
+    final activeCases = dbService.cases.where((c) {
+      if (c.details == null) return true;
+      return c.details!['is_existing_agreement'] != true;
+    }).toList();
 
     final pages = [
       const CrmOverviewPage(),
-      CrmCasesPage(cases: cases),
+      CrmCasesPage(cases: activeCases),
       if (userProfile != null)
         ProfilePage(user: userProfile)
       else
@@ -103,6 +107,32 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         ),
         backgroundColor: const Color(0xFF0F172A),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever, color: Colors.red),
+            tooltip: 'Delete All Cases',
+            onPressed: () {
+              context.read<DatabaseService>().deleteAllCases();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('All cases deleted'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.sync, color: Colors.amber),
+            tooltip: 'Sync Cases',
+            onPressed: () {
+              context.read<DatabaseService>().fetchAdminDashboardData();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Syncing latest cases...'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.redAccent),
             onPressed: () async {

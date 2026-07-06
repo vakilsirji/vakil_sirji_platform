@@ -95,21 +95,9 @@ class PropertiesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      floatingActionButton: onAddProperty != null
-          ? FloatingActionButton.extended(
-              onPressed: () => _showAddPropertyDialog(context),
-              backgroundColor: const Color(0xFF0F172A),
-              icon: const Icon(Icons.add_home_work, color: Colors.white),
-              label: const Text(
-                'Add Property',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : null,
-      body: properties.isEmpty
+      body: Stack(
+        children: [
+          properties.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -515,6 +503,25 @@ class PropertiesPage extends StatelessWidget {
                 );
               },
             ),
+          if (onAddProperty != null && properties.isNotEmpty)
+            Positioned(
+              bottom: 120.0,
+              right: 16.0,
+              child: FloatingActionButton.extended(
+                onPressed: () => _showAddPropertyDialog(context),
+                backgroundColor: const Color(0xFF0F172A),
+                icon: const Icon(Icons.add_home_work, color: Colors.white),
+                label: const Text(
+                  'Add Property',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 

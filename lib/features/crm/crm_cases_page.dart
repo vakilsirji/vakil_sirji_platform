@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants.dart';
-
 import '../../models/legal_case.dart';
+import '../../services/database_service.dart';
 import 'process_case_screen.dart';
 
 class CrmCasesPage extends StatelessWidget {
@@ -106,6 +107,36 @@ class CrmCasesPage extends StatelessWidget {
                         ),
                         child: const Text('Process Case'),
                       ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                      tooltip: 'Delete Case',
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Delete Case'),
+                            content: const Text('Are you sure you want to permanently delete this case?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  context.read<DatabaseService>().deleteCrmCase(c.id, c.requestId);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Case deleted successfully')),
+                                  );
+                                },
+                                child: const Text('Delete', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
