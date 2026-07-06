@@ -665,7 +665,6 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                   ),
                 ],
               ),
-              _buildTextField('w1_aadhaar', 'Aadhaar Number'),
               _buildTextField('w1_address', 'Address', maxLines: 2),
               const Divider(height: 32),
               const Text(
@@ -688,7 +687,6 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                   ),
                 ],
               ),
-              _buildTextField('w2_aadhaar', 'Aadhaar Number'),
               _buildTextField('w2_address', 'Address', maxLines: 2),
             ],
           ),
@@ -1168,7 +1166,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     }
 
     // Common Steps (Documents and Review)
-    steps.add(
+    if (_selectedOption != 1) {
+      steps.add(
       Step(
         title: const Text(
           'Upload Documents',
@@ -1186,18 +1185,44 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
               const SizedBox(height: 24),
               _buildUploadButton('Rent Agreement PDF'),
             ] else ...[
-              const Text(
-                'Enter names and upload documents below.',
-                style: TextStyle(color: AppColors.slate600),
+              Text(
+                _selectedOption == 1
+                    ? 'Enter details and upload documents below.'
+                    : 'Upload required documents below.',
+                style: const TextStyle(color: AppColors.slate600),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              if (_selectedOption == 1)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Please fill the address exactly as shown on the Aadhaar card. Original Aadhaar cards for the Owner, Tenant, and both Witnesses must be presented during the biometric appointment.',
+                          style: TextStyle(fontSize: 12, color: Colors.blue),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (_selectedOption == 1) const SizedBox(height: 24),
 
               const Text(
                 'Owner Details',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              _buildTextField('owner_name', 'Owner Name'),
+              if (_selectedOption == 1) _buildTextField('owner_name', 'Owner Name'),
+              _buildUploadButton('Owner Aadhaar', allowMultiple: false),
               _buildUploadButton('Owner PAN', allowMultiple: false),
               for (int i = 1; i <= _coOwnerCount; i++) ...[
                 const Divider(height: 16),
@@ -1206,7 +1231,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                _buildTextField('co_owner_${i}_name', 'Co-Owner $i Name'),
+                if (_selectedOption == 1) _buildTextField('co_owner_${i}_name', 'Co-Owner $i Name'),
                 _buildUploadButton('Co-Owner $i Aadhaar', allowMultiple: false),
                 _buildUploadButton('Co-Owner $i PAN', allowMultiple: false),
               ],
@@ -1222,7 +1247,8 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(height: 8),
-              _buildTextField('tenant_name', 'Tenant Name'),
+              if (_selectedOption == 1) _buildTextField('tenant_name', 'Tenant Name'),
+              _buildUploadButton('Tenant Aadhaar', allowMultiple: false),
               _buildUploadButton('Tenant PAN', allowMultiple: false),
               for (int i = 1; i <= _coTenantCount; i++) ...[
                 const Divider(height: 16),
@@ -1231,7 +1257,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                _buildTextField('co_tenant_${i}_name', 'Co-Tenant $i Name'),
+                if (_selectedOption == 1) _buildTextField('co_tenant_${i}_name', 'Co-Tenant $i Name'),
                 _buildUploadButton(
                   'Co-Tenant $i Aadhaar',
                   allowMultiple: false,
@@ -1247,13 +1273,14 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
 
               _buildUploadButton('Witness 1 Aadhaar'),
               _buildUploadButton('Witness 2 Aadhaar'),
-              const Divider(height: 32),
+              const Divider(height: 16),
               _buildUploadButton('Electricity Bill'),
             ],
           ],
         ),
       ),
     );
+    }
 
     steps.add(
       Step(
