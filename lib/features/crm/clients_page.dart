@@ -14,7 +14,8 @@ class ClientsPage extends StatefulWidget {
   State<ClientsPage> createState() => _ClientsPageState();
 }
 
-class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStateMixin {
+class _ClientsPageState extends State<ClientsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<String> _tabs = ['All Clients', 'Owners', 'Tenants'];
   String _searchQuery = '';
@@ -24,8 +25,12 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
     super.initState();
     int initialIndex = _tabs.indexOf(widget.initialFilter);
     if (initialIndex == -1) initialIndex = 0;
-    
-    _tabController = TabController(length: _tabs.length, vsync: this, initialIndex: initialIndex);
+
+    _tabController = TabController(
+      length: _tabs.length,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
   }
 
   @override
@@ -42,7 +47,14 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
     return Scaffold(
       backgroundColor: AppColors.slate50,
       appBar: AppBar(
-        title: const Text('Clients Directory', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
+        title: const Text(
+          'Clients Directory',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: const Color(0xFF0F172A),
         iconTheme: const IconThemeData(color: Colors.white),
         bottom: PreferredSize(
@@ -50,16 +62,25 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: TextField(
-                  onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+                  onChanged: (value) =>
+                      setState(() => _searchQuery = value.toLowerCase()),
                   decoration: InputDecoration(
                     hintText: 'Search by name, email, or phone...',
-                    hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                    hintStyle: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.5),
+                    ),
                     prefixIcon: const Icon(Icons.search, color: Colors.white70),
                     filled: true,
                     fillColor: Colors.white.withValues(alpha: 0.1),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(30),
+                      borderSide: BorderSide.none,
+                    ),
                     contentPadding: const EdgeInsets.symmetric(vertical: 0),
                   ),
                   style: const TextStyle(color: Colors.white),
@@ -85,14 +106,19 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
         children: [
           _buildClientList(allClients),
           _buildClientList(allClients.where((c) => c.role == 'owner').toList()),
-          _buildClientList(allClients.where((c) => c.role == 'tenant').toList()),
+          _buildClientList(
+            allClients.where((c) => c.role == 'tenant').toList(),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddClientForm(context, dbService),
         backgroundColor: Colors.blueAccent,
         icon: const Icon(Icons.person_add, color: Colors.white),
-        label: const Text('New Client', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'New Client',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -102,8 +128,8 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
     final filtered = clients.where((c) {
       if (_searchQuery.isEmpty) return true;
       return c.name.toLowerCase().contains(_searchQuery) ||
-             c.mobile.toLowerCase().contains(_searchQuery) ||
-             (c.email?.toLowerCase().contains(_searchQuery) ?? false);
+          c.mobile.toLowerCase().contains(_searchQuery) ||
+          (c.email?.toLowerCase().contains(_searchQuery) ?? false);
     }).toList();
 
     if (filtered.isEmpty) {
@@ -113,7 +139,10 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
           children: [
             Icon(Icons.people_outline, size: 64, color: AppColors.slate300),
             const SizedBox(height: 16),
-            const Text('No clients found.', style: TextStyle(color: AppColors.slate500, fontSize: 16)),
+            const Text(
+              'No clients found.',
+              style: TextStyle(color: AppColors.slate500, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -142,7 +171,9 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ClientProfilePage(client: client)),
+            MaterialPageRoute(
+              builder: (context) => ClientProfilePage(client: client),
+            ),
           );
         },
         borderRadius: BorderRadius.circular(12),
@@ -163,17 +194,30 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(client.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        Text(
+                          client.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                         const SizedBox(height: 4),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: roleColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Text(
                             isOwner ? 'Owner' : 'Tenant',
-                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: roleColor),
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              color: roleColor,
+                            ),
                           ),
                         ),
                       ],
@@ -205,14 +249,34 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
               const SizedBox(height: 12),
               Row(
                 children: [
-                  const Icon(Icons.phone_android, size: 14, color: AppColors.slate400),
+                  const Icon(
+                    Icons.phone_android,
+                    size: 14,
+                    color: AppColors.slate400,
+                  ),
                   const SizedBox(width: 6),
-                  Text(client.mobile, style: const TextStyle(color: AppColors.slate600, fontSize: 13)),
+                  Text(
+                    client.mobile,
+                    style: const TextStyle(
+                      color: AppColors.slate600,
+                      fontSize: 13,
+                    ),
+                  ),
                   const Spacer(),
                   if (client.email != null && client.email!.isNotEmpty) ...[
-                    const Icon(Icons.email_outlined, size: 14, color: AppColors.slate400),
+                    const Icon(
+                      Icons.email_outlined,
+                      size: 14,
+                      color: AppColors.slate400,
+                    ),
                     const SizedBox(width: 6),
-                    Text(client.email!, style: const TextStyle(color: AppColors.slate600, fontSize: 13)),
+                    Text(
+                      client.email!,
+                      style: const TextStyle(
+                        color: AppColors.slate600,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -251,38 +315,65 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Add New Client', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                const Text(
+                  'Add New Client',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => name = val!,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Mobile Number', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Mobile Number',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.phone,
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => mobile = val!,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Email (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Email (Optional)',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.emailAddress,
                   onSaved: (val) => email = val ?? '',
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: role,
-                  decoration: const InputDecoration(labelText: 'Role', border: OutlineInputBorder()),
-                  items: ['Owner', 'Tenant'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Role',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ['Owner', 'Tenant']
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
                   onChanged: (val) => role = val!,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Address', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Address',
+                    border: OutlineInputBorder(),
+                  ),
                   maxLines: 2,
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => address = val!,
                 ),
                 const SizedBox(height: 24),
@@ -292,30 +383,51 @@ class _ClientsPageState extends State<ClientsPage> with SingleTickerProviderStat
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blueAccent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     onPressed: () async {
                       if (formKey.currentState!.validate()) {
                         formKey.currentState!.save();
                         Navigator.pop(bottomSheetContext);
-                        
+
                         try {
-                          await dbService.addClient(name, mobile, email, address, role);
+                          await dbService.addClient(
+                            name,
+                            mobile,
+                            email,
+                            address,
+                            role,
+                          );
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Client added successfully!'), backgroundColor: Colors.green),
+                              const SnackBar(
+                                content: Text('Client added successfully!'),
+                                backgroundColor: Colors.green,
+                              ),
                             );
                           }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error adding client: $e'), backgroundColor: Colors.red),
+                              SnackBar(
+                                content: Text('Error adding client: $e'),
+                                backgroundColor: Colors.red,
+                              ),
                             );
                           }
                         }
                       }
                     },
-                    child: const Text('Save Client', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text(
+                      'Save Client',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

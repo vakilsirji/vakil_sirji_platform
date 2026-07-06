@@ -25,7 +25,9 @@ class Document {
       documentType: json['document_type'] ?? 'Unknown',
       fileUrl: json['file_url'] ?? '',
       uploadedBy: json['uploaded_by'] ?? '',
-      uploadedAt: json['uploaded_at'] != null ? DateTime.tryParse(json['uploaded_at']) ?? DateTime.now() : DateTime.now(),
+      uploadedAt: json['uploaded_at'] != null
+          ? DateTime.tryParse(json['uploaded_at']) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 }

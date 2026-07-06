@@ -1,6 +1,14 @@
 enum AgreementStatus {
-  newRequest, documentsPending, dataEntry, verification, draftReady,
-  clientApproval, biometricScheduled, biometricCompleted, governmentRegistration, completed
+  newRequest,
+  documentsPending,
+  dataEntry,
+  verification,
+  draftReady,
+  clientApproval,
+  biometricScheduled,
+  biometricCompleted,
+  governmentRegistration,
+  completed,
 }
 
 class LegalCase {
@@ -21,9 +29,20 @@ class LegalCase {
   final Map<String, dynamic>? details;
 
   LegalCase({
-    required this.id, required this.requestId, required this.title, required this.customerId,
-    this.propertyId, this.tenantId, this.documentUrl, this.details,
-    required this.clientName, required this.clientMobile, required this.serviceType,
-    required this.status, required this.createdAt, required this.updatedAt, this.notes,
+    required this.id,
+    required this.requestId,
+    required this.title,
+    required this.customerId,
+    this.propertyId,
+    this.tenantId,
+    this.documentUrl,
+    this.details,
+    required this.clientName,
+    required this.clientMobile,
+    required this.serviceType,
+    required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    this.notes,
   });
 }

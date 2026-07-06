@@ -14,10 +14,18 @@ class Tenant {
   final String? moveOutDate;
 
   Tenant({
-    required this.id, required this.name, required this.email, required this.mobile,
-    required this.aadhaar, required this.pan, required this.currentAddress,
-    required this.permanentAddress, this.propertyId,
-    this.emergencyContactName, this.emergencyContactNumber,
-    this.moveInDate, this.moveOutDate,
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.mobile,
+    required this.aadhaar,
+    required this.pan,
+    required this.currentAddress,
+    required this.permanentAddress,
+    this.propertyId,
+    this.emergencyContactName,
+    this.emergencyContactNumber,
+    this.moveInDate,
+    this.moveOutDate,
   });
 }

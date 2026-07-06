@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../core/constants.dart';
 import '../../models/user_profile.dart';
 import '../../models/payment.dart';
@@ -19,7 +20,8 @@ class CustomerDashboardScreen extends StatefulWidget {
   const CustomerDashboardScreen({super.key});
 
   @override
-  State<CustomerDashboardScreen> createState() => _CustomerDashboardScreenState();
+  State<CustomerDashboardScreen> createState() =>
+      _CustomerDashboardScreenState();
 }
 
 class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
@@ -52,7 +54,12 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
     }
   }
 
-  void _addNewCase(String serviceType, String propertyId, String tenantId, [Map<String, dynamic>? manualDetails]) async {
+  void _addNewCase(
+    String serviceType,
+    String propertyId,
+    String tenantId, [
+    Map<String, dynamic>? manualDetails,
+  ]) async {
     final dbService = context.read<DatabaseService>();
     try {
       await dbService.createServiceRequest(
@@ -63,13 +70,17 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         manualDetails: manualDetails,
       );
       if (mounted) {
-        final isOption3 = manualDetails != null && manualDetails['is_existing_agreement'] == true;
+        final isOption3 =
+            manualDetails != null &&
+            manualDetails['is_existing_agreement'] == true;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isOption3 
-                ? 'Agreement recorded and Rent Hub activated successfully!' 
-                : 'Service Request Submitted successfully! Case Created in CRM.'), 
-            backgroundColor: AppColors.emerald600
+            content: Text(
+              isOption3
+                  ? 'Agreement recorded and Rent Hub activated successfully!'
+                  : 'Service Request Submitted successfully! Case Created in CRM.',
+            ),
+            backgroundColor: AppColors.emerald600,
           ),
         );
         setState(() {}); // Refresh UI with new cases
@@ -77,7 +88,10 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to submit request: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Failed to submit request: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -107,7 +121,7 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
     final tenants = dbService.tenants;
     final cases = dbService.cases;
     // We don't have payments in the DB service yet, just use an empty list for now
-    final payments = <Payment>[]; 
+    final payments = <Payment>[];
 
     final List<Widget> pages = [
       OverviewPage(
@@ -141,11 +155,23 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
       PropertiesPage(
         properties: properties,
         tenants: tenants,
-        onAddProperty: (name, address, city, state, pin, type, rent, deposit) async {
-          final dbs = context.read<DatabaseService>();
-          await dbs.addProperty(_currentUser.id, name, address, city, state, pin, rent, deposit, propertyType: type);
-          if (mounted) setState(() {});
-        },
+        cases: cases,
+        onAddProperty:
+            (name, address, city, state, pin, type, rent, deposit) async {
+              final dbs = context.read<DatabaseService>();
+              await dbs.addProperty(
+                _currentUser.id,
+                name,
+                address,
+                city,
+                state,
+                pin,
+                rent,
+                deposit,
+                propertyType: type,
+              );
+              if (mounted) setState(() {});
+            },
         onCreateAgreement: () {
           Navigator.push(
             context,
@@ -159,11 +185,24 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
             ),
           );
         },
-        onEditProperty: (id, name, address, city, state, pin, type, rent, deposit) async {
-          final dbs = context.read<DatabaseService>();
-          await dbs.updateProperty(id, _currentUser.id, name, address, city, state, pin, rent, deposit, propertyType: type);
-          if (mounted) setState(() {});
-        },
+        onSubmitRequest: _addNewCase,
+        onEditProperty:
+            (id, name, address, city, state, pin, type, rent, deposit) async {
+              final dbs = context.read<DatabaseService>();
+              await dbs.updateProperty(
+                id,
+                _currentUser.id,
+                name,
+                address,
+                city,
+                state,
+                pin,
+                rent,
+                deposit,
+                propertyType: type,
+              );
+              if (mounted) setState(() {});
+            },
         onDeleteProperty: (id) async {
           final dbs = context.read<DatabaseService>();
           await dbs.deleteProperty(id, _currentUser.id);
@@ -185,7 +224,8 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
             context: context,
             isScrollControlled: true,
             backgroundColor: Colors.transparent,
-            builder: (ctx) => AddTenantForm(properties: properties, existingTenant: tenant),
+            builder: (ctx) =>
+                AddTenantForm(properties: properties, existingTenant: tenant),
           );
         },
         onDeleteTenant: (id) async {
@@ -199,11 +239,25 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         tenants: tenants,
         payments: dbService.payments,
         onSaveReminderSettings: (propId, enabled, dueDay, channel) async {
-          await dbService.updatePropertyReminderSettings(propId, _currentUser.id, enabled, dueDay, channel);
+          await dbService.updatePropertyReminderSettings(
+            propId,
+            _currentUser.id,
+            enabled,
+            dueDay,
+            channel,
+          );
           if (mounted) setState(() {});
         },
         onAddPayment: (payment) async {
-          await dbService.addPayment(payment.entityId, payment.entityType, payment.amount, payment.status, payment.paymentDate, payment.transactionId, payment.description);
+          await dbService.addPayment(
+            payment.entityId,
+            payment.entityType,
+            payment.amount,
+            payment.status,
+            payment.paymentDate,
+            payment.transactionId,
+            payment.description,
+          );
           if (mounted) setState(() {});
         },
       ),
@@ -213,8 +267,48 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
       ),
     ];
 
-    return Scaffold(
-      backgroundColor: AppColors.slate50,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (_currentIndex != 0) {
+          setState(() {
+            _currentIndex = 0;
+          });
+          return;
+        }
+
+        final shouldExit = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Exit App'),
+            content: const Text('Do you want to exit the application or sign out?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.pop(context, false);
+                  await context.read<AuthService>().signOut();
+                },
+                child: const Text('Sign Out', style: TextStyle(color: Colors.red)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Exit'),
+              ),
+            ],
+          ),
+        );
+
+        if (shouldExit == true) {
+          SystemNavigator.pop();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.slate50,
       appBar: AppBar(
         leading: _currentIndex != 0
             ? IconButton(
@@ -247,13 +341,27 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
         backgroundColor: const Color(0xFF0F172A),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_active, color: Colors.amber, size: 20),
+            icon: const Icon(
+              Icons.notifications_active,
+              color: Colors.amber,
+              size: 20,
+            ),
             onPressed: () {},
           ),
           IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.white, size: 24),
+            icon: const Icon(
+              Icons.account_circle,
+              color: Colors.white,
+              size: 24,
+            ),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user: _currentUser, isStandalone: true)));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ProfilePage(user: _currentUser, isStandalone: true),
+                ),
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -288,66 +396,108 @@ class _CustomerDashboardScreenState extends State<CustomerDashboardScreen> {
             backgroundColor: Colors.white,
             selectedItemColor: const Color(0xFF0F172A),
             unselectedItemColor: AppColors.slate400,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
             unselectedLabelStyle: const TextStyle(fontSize: 10),
             items: const [
-              BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), activeIcon: Icon(Icons.dashboard), label: 'Overview'),
-              BottomNavigationBarItem(icon: Icon(Icons.assignment_outlined), activeIcon: Icon(Icons.assignment), label: 'Agreements'),
-              BottomNavigationBarItem(icon: Icon(Icons.business_outlined), activeIcon: Icon(Icons.business), label: 'Properties'),
-              BottomNavigationBarItem(icon: Icon(Icons.group_outlined), activeIcon: Icon(Icons.group), label: 'Tenants'),
-              BottomNavigationBarItem(icon: Icon(Icons.payments_outlined), activeIcon: Icon(Icons.payments), label: 'Rent Hub'),
-              BottomNavigationBarItem(icon: Icon(Icons.folder_outlined), activeIcon: Icon(Icons.folder), label: 'Vault'),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.dashboard_outlined),
+                activeIcon: Icon(Icons.dashboard),
+                label: 'Overview',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.assignment_outlined),
+                activeIcon: Icon(Icons.assignment),
+                label: 'Agreements',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.business_outlined),
+                activeIcon: Icon(Icons.business),
+                label: 'Properties',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.group_outlined),
+                activeIcon: Icon(Icons.group),
+                label: 'Tenants',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.payments_outlined),
+                activeIcon: Icon(Icons.payments),
+                label: 'Rent Hub',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.folder_outlined),
+                activeIcon: Icon(Icons.folder),
+                label: 'Vault',
+              ),
             ],
           ),
         ),
       ),
-      floatingActionButton: _currentIndex == 1 ? Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          FloatingActionButton.extended(
-            heroTag: 'fab_record',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CreateRequestScreen(
-                    properties: properties,
-                    tenants: tenants,
-                    currentUser: _currentUser,
-                    onSubmit: _addNewCase,
-                    initialIsExisting: true,
+      floatingActionButton: _currentIndex == 1
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                FloatingActionButton.extended(
+                  heroTag: 'fab_record',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateRequestScreen(
+                          properties: properties,
+                          tenants: tenants,
+                          currentUser: _currentUser,
+                          onSubmit: _addNewCase,
+                          initialIsExisting: true,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: Colors.blue.shade700,
+                  icon: const Icon(Icons.history_edu, color: Colors.white),
+                  label: const Text(
+                    'Record Existing Agreement',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              );
-            },
-            backgroundColor: Colors.blue.shade700,
-            icon: const Icon(Icons.history_edu, color: Colors.white),
-            label: const Text('Record Existing Agreement', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-          const SizedBox(height: 16),
-          FloatingActionButton.extended(
-            heroTag: 'fab_create',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CreateRequestScreen(
-                    properties: properties,
-                    tenants: tenants,
-                    currentUser: _currentUser,
-                    onSubmit: _addNewCase,
-                    initialIsExisting: false,
+                const SizedBox(height: 16),
+                FloatingActionButton.extended(
+                  heroTag: 'fab_create',
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CreateRequestScreen(
+                          properties: properties,
+                          tenants: tenants,
+                          currentUser: _currentUser,
+                          onSubmit: _addNewCase,
+                          initialIsExisting: false,
+                        ),
+                      ),
+                    );
+                  },
+                  backgroundColor: const Color(0xFF0F172A),
+                  icon: const Icon(Icons.add, color: Colors.amber),
+                  label: const Text(
+                    'Create Agreement',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              );
-            },
-            backgroundColor: const Color(0xFF0F172A),
-            icon: const Icon(Icons.add, color: Colors.amber),
-            label: const Text('Create Agreement', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ) : null,
+              ],
+            )
+          : null,
+      ),
     );
   }
 }

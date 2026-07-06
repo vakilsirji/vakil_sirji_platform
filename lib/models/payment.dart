@@ -9,8 +9,14 @@ class Payment {
   final String description;
 
   Payment({
-    required this.id, required this.entityId, required this.entityType, required this.amount,
-    required this.status, required this.paymentDate, this.transactionId, required this.description,
+    required this.id,
+    required this.entityId,
+    required this.entityType,
+    required this.amount,
+    required this.status,
+    required this.paymentDate,
+    this.transactionId,
+    required this.description,
   });
 
   factory Payment.fromJson(Map<String, dynamic> json) {
@@ -18,7 +24,9 @@ class Payment {
       id: json['id'] ?? '',
       entityId: json['entity_id'] ?? '',
       entityType: json['entity_type'] ?? 'Unknown',
-      amount: (json['amount'] != null) ? double.parse(json['amount'].toString()) : 0.0,
+      amount: (json['amount'] != null)
+          ? double.parse(json['amount'].toString())
+          : 0.0,
       status: json['status'] ?? 'Pending',
       paymentDate: json['payment_date'] ?? '',
       transactionId: json['transaction_id'],

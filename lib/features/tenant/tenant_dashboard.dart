@@ -28,7 +28,9 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
       _currentUser = context.read<AuthService>().userProfile!;
       Future.microtask(() {
         context.read<DatabaseService>().clearData();
-        context.read<DatabaseService>().fetchTenantDashboardData(_currentUser.mobile);
+        context.read<DatabaseService>().fetchTenantDashboardData(
+          _currentUser.mobile,
+        );
       });
       _isInit = true;
     }
@@ -80,9 +82,19 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
         backgroundColor: const Color(0xFF0F172A),
         actions: [
           IconButton(
-            icon: const Icon(Icons.account_circle, color: Colors.white, size: 24),
+            icon: const Icon(
+              Icons.account_circle,
+              color: Colors.white,
+              size: 24,
+            ),
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ProfilePage(user: _currentUser, isStandalone: true)));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ProfilePage(user: _currentUser, isStandalone: true),
+                ),
+              );
             },
           ),
           const SizedBox(width: 8),
@@ -112,8 +124,14 @@ class _TenantDashboardScreenState extends State<TenantDashboardScreen> {
             backgroundColor: Colors.white,
             selectedItemColor: const Color(0xFF0F172A),
             unselectedItemColor: AppColors.slate400,
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 10),
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 10,
+            ),
             items: const [
               BottomNavigationBarItem(
                 icon: Icon(Icons.home_outlined),

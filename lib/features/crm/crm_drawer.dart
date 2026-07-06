@@ -45,7 +45,12 @@ class CrmDrawer extends StatelessWidget {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.only(top: 24, bottom: 24, left: 20, right: 20),
+                padding: const EdgeInsets.only(
+                  top: 24,
+                  bottom: 24,
+                  left: 20,
+                  right: 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -59,23 +64,35 @@ class CrmDrawer extends StatelessWidget {
                             color: Colors.redAccent,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.shield, color: Colors.white, size: 28),
+                          child: const Icon(
+                            Icons.shield,
+                            color: Colors.white,
+                            size: 28,
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close, color: Colors.white54),
                           onPressed: () => Navigator.pop(context),
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       name,
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'GHARBOOK $role',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12, letterSpacing: 1.2),
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                        letterSpacing: 1.2,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     // GLOBAL SEARCH
@@ -86,14 +103,24 @@ class CrmDrawer extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TextField(
-                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                         decoration: InputDecoration(
                           hintText: '🔍 Search Global...',
-                          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 14),
+                          hintStyle: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            fontSize: 14,
+                          ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
                         ),
-                        onSubmitted: (val) => _showComingSoon(context, 'Global Search'),
+                        onSubmitted: (val) =>
+                            _showComingSoon(context, 'Global Search'),
                       ),
                     ),
                   ],
@@ -101,17 +128,29 @@ class CrmDrawer extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // SCROLLABLE MODULE LIST
           Expanded(
             child: ListView(
               padding: const EdgeInsets.only(bottom: 20),
               children: [
                 ListTile(
-                  leading: const Icon(Icons.dashboard, color: Color(0xFF0F172A)),
-                  title: const Text('Dashboard', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 15)),
+                  leading: const Icon(
+                    Icons.dashboard,
+                    color: Color(0xFF0F172A),
+                  ),
+                  title: const Text(
+                    'Dashboard',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                      fontSize: 15,
+                    ),
+                  ),
                   onTap: () {
-                    Navigator.pop(context); // Close drawer to show the dashboard
+                    Navigator.pop(
+                      context,
+                    ); // Close drawer to show the dashboard
                   },
                 ),
                 const Divider(height: 1, color: AppColors.slate200),
@@ -135,7 +174,7 @@ class CrmDrawer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // LOGOUT FOOTER
           Container(
             padding: const EdgeInsets.all(16),
@@ -144,7 +183,13 @@ class CrmDrawer extends StatelessWidget {
             ),
             child: ListTile(
               leading: const Icon(Icons.logout, color: Colors.redAccent),
-              title: const Text('Secure Logout', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold)),
+              title: const Text(
+                'Secure Logout',
+                style: TextStyle(
+                  color: Colors.redAccent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               onTap: () async {
                 await context.read<AuthService>().signOut();
                 if (context.mounted) {
@@ -162,33 +207,97 @@ class CrmDrawer extends StatelessWidget {
     return Column(
       children: [
         ListTile(
-          title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A), fontSize: 15)),
-          trailing: const Icon(Icons.chevron_right, size: 16, color: AppColors.slate400),
+          title: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+              fontSize: 15,
+            ),
+          ),
+          trailing: const Icon(
+            Icons.chevron_right,
+            size: 16,
+            color: AppColors.slate400,
+          ),
           onTap: () {
             if (title.contains('Leads')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Leads')), body: const LeadsPage(initialFilter: 'All'))));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Leads')),
+                    body: const LeadsPage(initialFilter: 'All'),
+                  ),
+                ),
+              );
             } else if (title.contains('Clients')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Clients')), body: const ClientsPage(initialFilter: 'All'))));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Clients')),
+                    body: const ClientsPage(initialFilter: 'All'),
+                  ),
+                ),
+              );
             } else if (title.contains('Properties')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Properties')), body: const CrmPropertiesPage())));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Properties')),
+                    body: const CrmPropertiesPage(),
+                  ),
+                ),
+              );
             } else if (title.contains('Cases') || title.contains('Service')) {
               Navigator.pop(context);
               final cases = context.read<DatabaseService>().cases;
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Service Requests')), body: CrmCasesPage(cases: cases))));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Service Requests')),
+                    body: CrmCasesPage(cases: cases),
+                  ),
+                ),
+              );
             } else if (title.contains('Documents')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Documents')), body: const CrmDocumentsPage())));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Documents')),
+                    body: const CrmDocumentsPage(),
+                  ),
+                ),
+              );
             } else if (title.contains('Payments')) {
               Navigator.pop(context);
-              Navigator.push(context, MaterialPageRoute(builder: (context) => Scaffold(appBar: AppBar(title: const Text('Payments')), body: const CrmPaymentsPage())));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Payments')),
+                    body: const CrmPaymentsPage(),
+                  ),
+                ),
+              );
             } else if (title.contains('Staff')) {
               final userProfile = context.read<AuthService>().userProfile;
               if (userProfile?.role == UserRole.admin) {
                 Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const AdminStaffManagementPage()));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminStaffManagementPage(),
+                  ),
+                );
               } else {
                 _showComingSoon(context, 'Staff Directory');
               }

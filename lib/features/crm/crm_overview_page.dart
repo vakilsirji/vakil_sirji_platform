@@ -11,7 +11,14 @@ class CrmOverviewPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Today\'s Performance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+          const Text(
+            'Today\'s Performance',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+            ),
+          ),
           const SizedBox(height: 16),
           GridView.count(
             shrinkWrap: true,
@@ -28,11 +35,30 @@ class CrmOverviewPage extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          const Text('Recent Activity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+          const Text(
+            'Recent Activity',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+            ),
+          ),
           const SizedBox(height: 12),
-          _buildActivityItem('Case #REQ_102 Draft Generated', '2 mins ago', Icons.description),
-          _buildActivityItem('Biometric Completed for Tenant: Rohan', '15 mins ago', Icons.fingerprint),
-          _buildActivityItem('New Rent Agreement Request', '1 hour ago', Icons.add_circle_outline),
+          _buildActivityItem(
+            'Case #REQ_102 Draft Generated',
+            '2 mins ago',
+            Icons.description,
+          ),
+          _buildActivityItem(
+            'Biometric Completed for Tenant: Rohan',
+            '15 mins ago',
+            Icons.fingerprint,
+          ),
+          _buildActivityItem(
+            'New Rent Agreement Request',
+            '1 hour ago',
+            Icons.add_circle_outline,
+          ),
         ],
       ),
     );
@@ -48,9 +74,23 @@ class CrmOverviewPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(count, style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: color)),
+            Text(
+              count,
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
             const SizedBox(height: 4),
-            Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.slate600)),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.slate600,
+              ),
+            ),
           ],
         ),
       ),
@@ -61,11 +101,23 @@ class CrmOverviewPage extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: AppColors.slate200)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: AppColors.slate200),
+      ),
       child: ListTile(
-        leading: CircleAvatar(backgroundColor: AppColors.slate100, child: Icon(icon, color: const Color(0xFF0F172A), size: 20)),
-        title: Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-        subtitle: Text(time, style: const TextStyle(fontSize: 11, color: AppColors.slate500)),
+        leading: CircleAvatar(
+          backgroundColor: AppColors.slate100,
+          child: Icon(icon, color: const Color(0xFF0F172A), size: 20),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+        ),
+        subtitle: Text(
+          time,
+          style: const TextStyle(fontSize: 11, color: AppColors.slate500),
+        ),
       ),
     );
   }

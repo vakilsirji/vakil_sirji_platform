@@ -14,7 +14,7 @@ class CaseTimelineSheet extends StatefulWidget {
   final Future<void> Function(String, String, Uint8List)? onUploadDocument;
 
   const CaseTimelineSheet({
-    super.key, 
+    super.key,
     required this.legalCase,
     this.startDate,
     this.endDate,
@@ -34,7 +34,15 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
   }
 
   String _formatKey(String key) {
-    return key.replaceAll('_', ' ').split(' ').map((word) => word.isNotEmpty ? '${word[0].toUpperCase()}${word.substring(1)}' : '').join(' ');
+    return key
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map(
+          (word) => word.isNotEmpty
+              ? '${word[0].toUpperCase()}${word.substring(1)}'
+              : '',
+        )
+        .join(' ');
   }
 
   Future<void> _launchUrl(String urlString) async {
@@ -47,26 +55,36 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
   @override
   Widget build(BuildContext context) {
     final dbService = context.watch<DatabaseService>();
-    final property = dbService.properties.where((p) => p.id == widget.legalCase.propertyId).firstOrNull;
-    final tenant = dbService.tenants.where((t) => t.id == widget.legalCase.tenantId).firstOrNull;
+    final property = dbService.properties
+        .where((p) => p.id == widget.legalCase.propertyId)
+        .firstOrNull;
+    final tenant = dbService.tenants
+        .where((t) => t.id == widget.legalCase.tenantId)
+        .firstOrNull;
 
     // Check missing details
     final List<String> missingDetails = [];
-    
+
     if (widget.legalCase.propertyId == null) {
       missingDetails.add("Property not selected for this agreement.");
     }
     if (widget.legalCase.tenantId == null) {
       missingDetails.add("Tenant not selected for this agreement.");
     } else if (tenant != null) {
-      if (tenant.aadhaar.isEmpty) missingDetails.add("Tenant Aadhaar is missing.");
+      if (tenant.aadhaar.isEmpty)
+        missingDetails.add("Tenant Aadhaar is missing.");
       if (tenant.pan.isEmpty) missingDetails.add("Tenant PAN is missing.");
-      if (tenant.currentAddress.isEmpty) missingDetails.add("Tenant Address is missing.");
+      if (tenant.currentAddress.isEmpty)
+        missingDetails.add("Tenant Address is missing.");
     }
 
     // Check document based on service type
-    bool isRecordExisting = widget.legalCase.serviceType.toLowerCase().contains("record") || widget.legalCase.serviceType.toLowerCase().contains("existing");
-    if (isRecordExisting && (widget.legalCase.documentUrl == null || widget.legalCase.documentUrl!.isEmpty)) {
+    bool isRecordExisting =
+        widget.legalCase.serviceType.toLowerCase().contains("record") ||
+        widget.legalCase.serviceType.toLowerCase().contains("existing");
+    if (isRecordExisting &&
+        (widget.legalCase.documentUrl == null ||
+            widget.legalCase.documentUrl!.isEmpty)) {
       missingDetails.add("Agreement PDF document not uploaded.");
     }
 
@@ -92,39 +110,86 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Agreement Status', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                const Text(
+                  'Agreement Status',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ],
             ),
             const SizedBox(height: 8),
-            Text(widget.legalCase.title, style: const TextStyle(color: AppColors.slate500, fontSize: 14)),
+            Text(
+              widget.legalCase.title,
+              style: const TextStyle(color: AppColors.slate500, fontSize: 14),
+            ),
             const Divider(height: 32),
-            
+
             if (widget.startDate != null && widget.endDate != null) ...[
-              _buildDetailRow('Start Date', widget.startDate!.toLocal().toString().split(' ')[0]),
-              _buildDetailRow('End Date', widget.endDate!.toLocal().toString().split(' ')[0]),
+              _buildDetailRow(
+                'Start Date',
+                widget.startDate!.toLocal().toString().split(' ')[0],
+              ),
+              _buildDetailRow(
+                'End Date',
+                widget.endDate!.toLocal().toString().split(' ')[0],
+              ),
               const SizedBox(height: 16),
             ],
 
             if (details.isNotEmpty) ...[
-              const Text('Submitted Information', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              const Text(
+                'Submitted Information',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              ),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.slate200)),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.slate200),
+                ),
                 child: Column(
-                  children: details.entries.where((e) => !e.key.contains('date')).map((e) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 2, child: Text(_formatKey(e.key), style: const TextStyle(color: AppColors.slate500, fontSize: 12))),
-                          Expanded(flex: 3, child: Text(e.value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                  children: details.entries
+                      .where((e) => !e.key.contains('date'))
+                      .map((e) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  _formatKey(e.key),
+                                  style: const TextStyle(
+                                    color: AppColors.slate500,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  e.value,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      })
+                      .toList(),
                 ),
               ),
               const SizedBox(height: 24),
@@ -143,24 +208,54 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.warning_amber_rounded, color: Colors.red.shade700, size: 20),
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: Colors.red.shade700,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
-                        Text('Action Required', style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.bold, fontSize: 14)),
+                        Text(
+                          'Action Required',
+                          style: TextStyle(
+                            color: Colors.red.shade900,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    const Text('Please complete the following details to proceed:', style: TextStyle(color: Colors.red, fontSize: 12)),
+                    const Text(
+                      'Please complete the following details to proceed:',
+                      style: TextStyle(color: Colors.red, fontSize: 12),
+                    ),
                     const SizedBox(height: 8),
-                    ...missingDetails.map((msg) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('• ', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                          Expanded(child: Text(msg, style: const TextStyle(color: Colors.red, fontSize: 12))),
-                        ],
+                    ...missingDetails.map(
+                      (msg) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              '• ',
+                              style: TextStyle(
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                msg,
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    )),
+                    ),
                   ],
                 ),
               ),
@@ -171,53 +266,90 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
               const SizedBox(height: 24),
             ],
 
-            if (widget.legalCase.documentUrl != null && widget.legalCase.documentUrl!.isNotEmpty)
+            if (widget.legalCase.documentUrl != null &&
+                widget.legalCase.documentUrl!.isNotEmpty)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: () => _launchUrl(widget.legalCase.documentUrl!),
                   icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-                  label: const Text('View Agreement Document', style: TextStyle(fontWeight: FontWeight.bold)),
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 16)),
+                  label: const Text(
+                    'View Agreement Document',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F172A),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
                 ),
               )
             else if (widget.onUploadDocument != null)
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
-                  onPressed: _isUploading ? null : () async {
-                    setState(() => _isUploading = true);
-                    try {
-                      final result = await FilePicker.pickFiles(
-                        type: FileType.custom,
-                        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-                        withData: true,
-                      );
-                      if (result != null && result.files.isNotEmpty) {
-                        final file = result.files.first;
-                        if (file.bytes != null) {
-                          await widget.onUploadDocument!(widget.legalCase.id, file.name, file.bytes!);
-                          if (mounted) {
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document attached successfully!')));
+                  onPressed: _isUploading
+                      ? null
+                      : () async {
+                          setState(() => _isUploading = true);
+                          try {
+                            final result = await FilePicker.pickFiles(
+                              type: FileType.custom,
+                              allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+                              withData: true,
+                            );
+                            if (result != null && result.files.isNotEmpty) {
+                              final file = result.files.first;
+                              if (file.bytes != null) {
+                                await widget.onUploadDocument!(
+                                  widget.legalCase.id,
+                                  file.name,
+                                  file.bytes!,
+                                );
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Document attached successfully!',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                throw Exception(
+                                  'Could not read file data. Try another file.',
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Upload failed: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          } finally {
+                            if (mounted) setState(() => _isUploading = false);
                           }
-                        } else {
-                          throw Exception('Could not read file data. Try another file.');
-                        }
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Upload failed: $e'), backgroundColor: Colors.red));
-                      }
-                    } finally {
-                      if (mounted) setState(() => _isUploading = false);
-                    }
-                  },
-                  icon: _isUploading 
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)) 
-                    : const Icon(Icons.upload_file, color: Colors.indigo),
-                  label: Text(_isUploading ? 'Uploading...' : 'Upload Agreement Document', style: const TextStyle(fontWeight: FontWeight.bold)),
-                  style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), side: const BorderSide(color: Colors.indigo)),
+                        },
+                  icon: _isUploading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.upload_file, color: Colors.indigo),
+                  label: Text(
+                    _isUploading ? 'Uploading...' : 'Upload Agreement Document',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    side: const BorderSide(color: Colors.indigo),
+                  ),
                 ),
               ),
           ],
@@ -232,8 +364,14 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.slate500, fontSize: 13)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.slate500, fontSize: 13),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -244,16 +382,24 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
       {'status': AgreementStatus.newRequest, 'label': 'Request Received'},
       {'status': AgreementStatus.documentsPending, 'label': 'Document Review'},
       {'status': AgreementStatus.draftReady, 'label': 'Draft Ready'},
-      {'status': AgreementStatus.biometricCompleted, 'label': 'Biometric Verified'},
-      {'status': AgreementStatus.governmentRegistration, 'label': 'Govt Registration'},
+      {
+        'status': AgreementStatus.biometricCompleted,
+        'label': 'Biometric Verified',
+      },
+      {
+        'status': AgreementStatus.governmentRegistration,
+        'label': 'Govt Registration',
+      },
       {'status': AgreementStatus.completed, 'label': 'Completed'},
     ];
 
     int currentIndex = stages.indexWhere((s) => s['status'] == currentStatus);
     if (currentIndex == -1) {
-      if (currentStatus == AgreementStatus.dataEntry || currentStatus == AgreementStatus.verification) {
-        currentIndex = 1; 
-      } else if (currentStatus == AgreementStatus.clientApproval || currentStatus == AgreementStatus.biometricScheduled) {
+      if (currentStatus == AgreementStatus.dataEntry ||
+          currentStatus == AgreementStatus.verification) {
+        currentIndex = 1;
+      } else if (currentStatus == AgreementStatus.clientApproval ||
+          currentStatus == AgreementStatus.biometricScheduled) {
         currentIndex = 2;
       } else {
         currentIndex = 0;
@@ -276,12 +422,18 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
                   height: 24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isCompleted ? Colors.green : (isCurrent ? Colors.amber : Colors.grey.shade300),
+                    color: isCompleted
+                        ? Colors.green
+                        : (isCurrent ? Colors.amber : Colors.grey.shade300),
                   ),
                   child: Icon(
-                    isCompleted ? Icons.check : (isCurrent ? Icons.circle : Icons.circle_outlined),
+                    isCompleted
+                        ? Icons.check
+                        : (isCurrent ? Icons.circle : Icons.circle_outlined),
                     size: 14,
-                    color: isCompleted ? Colors.white : (isCurrent ? Colors.white : Colors.grey.shade500),
+                    color: isCompleted
+                        ? Colors.white
+                        : (isCurrent ? Colors.white : Colors.grey.shade500),
                   ),
                 ),
                 if (index < stages.length - 1)
@@ -300,7 +452,9 @@ class _CaseTimelineSheetState extends State<CaseTimelineSheet> {
                   label,
                   style: TextStyle(
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                    color: isCompleted || isCurrent ? const Color(0xFF0F172A) : AppColors.slate400,
+                    color: isCompleted || isCurrent
+                        ? const Color(0xFF0F172A)
+                        : AppColors.slate400,
                     fontSize: 14,
                   ),
                 ),

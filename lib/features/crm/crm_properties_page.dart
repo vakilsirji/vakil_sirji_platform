@@ -22,14 +22,21 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
     final filtered = properties.where((p) {
       if (_searchQuery.isEmpty) return true;
       return p.name.toLowerCase().contains(_searchQuery) ||
-             p.address.toLowerCase().contains(_searchQuery) ||
-             p.city.toLowerCase().contains(_searchQuery);
+          p.address.toLowerCase().contains(_searchQuery) ||
+          p.city.toLowerCase().contains(_searchQuery);
     }).toList();
 
     return Scaffold(
       backgroundColor: AppColors.slate50,
       appBar: AppBar(
-        title: const Text('Properties Hub', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
+        title: const Text(
+          'Properties Hub',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: const Color(0xFF0F172A),
         iconTheme: const IconThemeData(color: Colors.white),
         bottom: PreferredSize(
@@ -37,14 +44,20 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: TextField(
-              onChanged: (value) => setState(() => _searchQuery = value.toLowerCase()),
+              onChanged: (value) =>
+                  setState(() => _searchQuery = value.toLowerCase()),
               decoration: InputDecoration(
                 hintText: 'Search by property name, address, or city...',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                hintStyle: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.5),
+                ),
                 prefixIcon: const Icon(Icons.search, color: Colors.white70),
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.1),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(30), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
               ),
               style: const TextStyle(color: Colors.white),
@@ -56,16 +69,26 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
         onPressed: () => _showAddPropertyForm(context, dbService),
         backgroundColor: const Color(0xFF0F172A),
         icon: const Icon(Icons.add_home, color: Colors.white),
-        label: const Text('New Property', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'New Property',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
       body: filtered.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.business_outlined, size: 64, color: AppColors.slate300),
+                  Icon(
+                    Icons.business_outlined,
+                    size: 64,
+                    color: AppColors.slate300,
+                  ),
                   const SizedBox(height: 16),
-                  const Text('No properties found.', style: TextStyle(color: AppColors.slate500, fontSize: 16)),
+                  const Text(
+                    'No properties found.',
+                    style: TextStyle(color: AppColors.slate500, fontSize: 16),
+                  ),
                 ],
               ),
             )
@@ -74,19 +97,31 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
               itemCount: filtered.length,
               itemBuilder: (context, index) {
                 final property = filtered[index];
-                
+
                 // Find Owner Name
-                final owner = dbService.clients.where((c) => c.id == property.ownerId).firstOrNull;
+                final owner = dbService.clients
+                    .where((c) => c.id == property.ownerId)
+                    .firstOrNull;
                 // Find Active Tenant (if any)
-                final tenant = dbService.tenants.where((t) => t.propertyId == property.id).firstOrNull;
+                final tenant = dbService.tenants
+                    .where((t) => t.propertyId == property.id)
+                    .firstOrNull;
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   elevation: 2,
                   child: InkWell(
                     onTap: () {
-                      _showPropertyDetails(context, property, owner?.name, tenant?.name, dbService);
+                      _showPropertyDetails(
+                        context,
+                        property,
+                        owner?.name,
+                        tenant?.name,
+                        dbService,
+                      );
                     },
                     borderRadius: BorderRadius.circular(12),
                     child: Padding(
@@ -99,19 +134,36 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: Colors.blueAccent.withValues(alpha: 0.1),
+                                  color: Colors.blueAccent.withValues(
+                                    alpha: 0.1,
+                                  ),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.location_city, color: Colors.blueAccent),
+                                child: const Icon(
+                                  Icons.location_city,
+                                  color: Colors.blueAccent,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(property.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                    Text(
+                                      property.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                     const SizedBox(height: 4),
-                                    Text('${property.address}, ${property.city}', style: const TextStyle(color: AppColors.slate500, fontSize: 12)),
+                                    Text(
+                                      '${property.address}, ${property.city}',
+                                      style: const TextStyle(
+                                        color: AppColors.slate500,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -125,24 +177,64 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Owner', style: TextStyle(color: AppColors.slate400, fontSize: 11)),
-                                  Text(owner?.name ?? 'Unknown', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  const Text(
+                                    'Owner',
+                                    style: TextStyle(
+                                      color: AppColors.slate400,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  Text(
+                                    owner?.name ?? 'Unknown',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                 ],
                               ),
                               const Spacer(),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text('Tenant', style: TextStyle(color: AppColors.slate400, fontSize: 11)),
-                                  Text(tenant?.name ?? 'Vacant', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: tenant != null ? Colors.teal : Colors.red)),
+                                  const Text(
+                                    'Tenant',
+                                    style: TextStyle(
+                                      color: AppColors.slate400,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  Text(
+                                    tenant?.name ?? 'Vacant',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: tenant != null
+                                          ? Colors.teal
+                                          : Colors.red,
+                                    ),
+                                  ),
                                 ],
                               ),
                               const Spacer(),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  const Text('Rent', style: TextStyle(color: AppColors.slate400, fontSize: 11)),
-                                  Text('₹${property.rentAmount}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.green)),
+                                  const Text(
+                                    'Rent',
+                                    style: TextStyle(
+                                      color: AppColors.slate400,
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                  Text(
+                                    '₹${property.rentAmount}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: Colors.green,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -157,12 +249,20 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
     );
   }
 
-  void _showPropertyDetails(BuildContext context, Property property, String? ownerName, String? tenantName, DatabaseService dbService) {
+  void _showPropertyDetails(
+    BuildContext context,
+    Property property,
+    String? ownerName,
+    String? tenantName,
+    DatabaseService dbService,
+  ) {
     // Basic bottom sheet for property details
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (bottomSheetContext) {
         return Container(
           padding: const EdgeInsets.all(24),
@@ -173,13 +273,22 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Property Details', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(bottomSheetContext)),
+                  const Text(
+                    'Property Details',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(bottomSheetContext),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
               _buildDetailRow('Property Name', property.name),
-              _buildDetailRow('Address', '${property.address}, ${property.city}, ${property.state} - ${property.pinCode}'),
+              _buildDetailRow(
+                'Address',
+                '${property.address}, ${property.city}, ${property.state} - ${property.pinCode}',
+              ),
               const Divider(),
               _buildDetailRow('Owner', ownerName ?? 'Unknown'),
               _buildDetailRow('Current Tenant', tenantName ?? 'Vacant'),
@@ -193,14 +302,26 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                   onPressed: () {
                     // Open Documents
                     Navigator.pop(bottomSheetContext);
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Property Documents Vault coming soon!')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Property Documents Vault coming soon!'),
+                      ),
+                    );
                   },
                   icon: const Icon(Icons.folder, color: Colors.white),
-                  label: const Text('View Documents', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'View Documents',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F172A),
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -213,10 +334,15 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                     Navigator.pop(bottomSheetContext);
                   },
                   icon: const Icon(Icons.add_task),
-                  label: const Text('Start New Agreement', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'Start New Agreement',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                 ),
               ),
@@ -224,7 +350,7 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
             ],
           ),
         );
-      }
+      },
     );
   }
 
@@ -234,9 +360,15 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: AppColors.slate400, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(color: AppColors.slate400, fontSize: 12),
+          ),
           const SizedBox(height: 2),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
         ],
       ),
     );
@@ -275,18 +407,33 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Add New Property', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                  const Text(
+                    'Add New Property',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Property Name/Tag', border: OutlineInputBorder()),
-                    validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                    decoration: const InputDecoration(
+                      labelText: 'Property Name/Tag',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Required' : null,
                     onSaved: (val) => name = val!,
                   ),
                   const SizedBox(height: 12),
                   TextFormField(
-                    decoration: const InputDecoration(labelText: 'Full Address', border: OutlineInputBorder()),
+                    decoration: const InputDecoration(
+                      labelText: 'Full Address',
+                      border: OutlineInputBorder(),
+                    ),
                     maxLines: 2,
-                    validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                    validator: (val) =>
+                        val == null || val.isEmpty ? 'Required' : null,
                     onSaved: (val) => address = val!,
                   ),
                   const SizedBox(height: 12),
@@ -295,14 +442,20 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                       Expanded(
                         child: TextFormField(
                           initialValue: city,
-                          decoration: const InputDecoration(labelText: 'City', border: OutlineInputBorder()),
+                          decoration: const InputDecoration(
+                            labelText: 'City',
+                            border: OutlineInputBorder(),
+                          ),
                           onSaved: (val) => city = val!,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextFormField(
-                          decoration: const InputDecoration(labelText: 'PIN Code', border: OutlineInputBorder()),
+                          decoration: const InputDecoration(
+                            labelText: 'PIN Code',
+                            border: OutlineInputBorder(),
+                          ),
                           keyboardType: TextInputType.number,
                           onSaved: (val) => pinCode = val!,
                         ),
@@ -314,18 +467,26 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                     children: [
                       Expanded(
                         child: TextFormField(
-                          decoration: const InputDecoration(labelText: 'Monthly Rent (₹)', border: OutlineInputBorder()),
+                          decoration: const InputDecoration(
+                            labelText: 'Monthly Rent (₹)',
+                            border: OutlineInputBorder(),
+                          ),
                           keyboardType: TextInputType.number,
-                          validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                          validator: (val) =>
+                              val == null || val.isEmpty ? 'Required' : null,
                           onSaved: (val) => rent = double.tryParse(val!) ?? 0,
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: TextFormField(
-                          decoration: const InputDecoration(labelText: 'Deposit (₹)', border: OutlineInputBorder()),
+                          decoration: const InputDecoration(
+                            labelText: 'Deposit (₹)',
+                            border: OutlineInputBorder(),
+                          ),
                           keyboardType: TextInputType.number,
-                          onSaved: (val) => deposit = double.tryParse(val!) ?? 0,
+                          onSaved: (val) =>
+                              deposit = double.tryParse(val!) ?? 0,
                         ),
                       ),
                     ],
@@ -337,30 +498,54 @@ class _CrmPropertiesPageState extends State<CrmPropertiesPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF0F172A),
                         padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
                       onPressed: () async {
                         if (formKey.currentState!.validate()) {
                           formKey.currentState!.save();
                           Navigator.pop(bottomSheetContext);
-                          
+
                           try {
-                            await dbService.addProperty(dummyOwnerId, name, address, city, state, pinCode, rent, deposit);
+                            await dbService.addProperty(
+                              dummyOwnerId,
+                              name,
+                              address,
+                              city,
+                              state,
+                              pinCode,
+                              rent,
+                              deposit,
+                            );
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Property added successfully!'), backgroundColor: Colors.green),
+                                const SnackBar(
+                                  content: Text('Property added successfully!'),
+                                  backgroundColor: Colors.green,
+                                ),
                               );
                             }
                           } catch (e) {
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Error adding property: $e'), backgroundColor: Colors.red),
+                                SnackBar(
+                                  content: Text('Error adding property: $e'),
+                                  backgroundColor: Colors.red,
+                                ),
                               );
                             }
                           }
                         }
                       },
-                      child: const Text('Save Property', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: const Text(
+                        'Save Property',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),

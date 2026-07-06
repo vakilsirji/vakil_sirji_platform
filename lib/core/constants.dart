@@ -23,5 +23,6 @@ class AppConstants {
   // Using validly formatted placeholder credentials to prevent Supabase SDK from crashing.
   // The user should replace these with their actual project credentials.
   static const String supabaseUrl = 'https://pjzscmoskmarshvlgodv.supabase.co';
-  static const String supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqenNjbW9za21hcnNodmxnb2R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzI5OTQsImV4cCI6MjA5NzU0ODk5NH0.1GGnx8PzDtGhnRLZG22xu3cjoffB49_vMPYqcdIri2I';
+  static const String supabaseAnonKey =
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBqenNjbW9za21hcnNodmxnb2R2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE5NzI5OTQsImV4cCI6MjA5NzU0ODk5NH0.1GGnx8PzDtGhnRLZG22xu3cjoffB49_vMPYqcdIri2I';
 }

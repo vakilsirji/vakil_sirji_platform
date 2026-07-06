@@ -11,7 +11,8 @@ class CrmPaymentsPage extends StatefulWidget {
   State<CrmPaymentsPage> createState() => _CrmPaymentsPageState();
 }
 
-class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProviderStateMixin {
+class _CrmPaymentsPageState extends State<CrmPaymentsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<String> _tabs = ['All', 'Pending', 'Paid', 'Failed'];
 
@@ -32,13 +33,24 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
     final dbService = context.watch<DatabaseService>();
     final payments = dbService.payments;
 
-    final totalRevenue = payments.where((p) => p.status == 'Paid').fold(0.0, (sum, p) => sum + p.amount);
-    final totalPending = payments.where((p) => p.status == 'Pending').fold(0.0, (sum, p) => sum + p.amount);
+    final totalRevenue = payments
+        .where((p) => p.status == 'Paid')
+        .fold(0.0, (sum, p) => sum + p.amount);
+    final totalPending = payments
+        .where((p) => p.status == 'Pending')
+        .fold(0.0, (sum, p) => sum + p.amount);
 
     return Scaffold(
       backgroundColor: AppColors.slate50,
       appBar: AppBar(
-        title: const Text('Payments & Invoicing', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
+        title: const Text(
+          'Payments & Invoicing',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: const Color(0xFF0F172A),
         iconTheme: const IconThemeData(color: Colors.white),
         bottom: TabBar(
@@ -69,7 +81,10 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
         onPressed: () => _showGenerateInvoiceForm(context, dbService),
         backgroundColor: Colors.redAccent,
         icon: const Icon(Icons.request_quote, color: Colors.white),
-        label: const Text('Generate Invoice', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'Generate Invoice',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -79,14 +94,25 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Color(0xFF0F172A),
-        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(20), bottomRight: Radius.circular(20)),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(20),
+          bottomRight: Radius.circular(20),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSummaryBox('Total Revenue', '₹${revenue.toStringAsFixed(0)}', Colors.greenAccent),
+          _buildSummaryBox(
+            'Total Revenue',
+            '₹${revenue.toStringAsFixed(0)}',
+            Colors.greenAccent,
+          ),
           Container(width: 1, height: 40, color: Colors.white24),
-          _buildSummaryBox('Pending Dues', '₹${pending.toStringAsFixed(0)}', Colors.orangeAccent),
+          _buildSummaryBox(
+            'Pending Dues',
+            '₹${pending.toStringAsFixed(0)}',
+            Colors.orangeAccent,
+          ),
         ],
       ),
     );
@@ -95,9 +121,19 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
   Widget _buildSummaryBox(String title, String amount, Color color) {
     return Column(
       children: [
-        Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+        Text(
+          title,
+          style: const TextStyle(color: Colors.white70, fontSize: 12),
+        ),
         const SizedBox(height: 4),
-        Text(amount, style: TextStyle(color: color, fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(
+          amount,
+          style: TextStyle(
+            color: color,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ],
     );
   }
@@ -108,9 +144,16 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.account_balance_wallet_outlined, size: 64, color: AppColors.slate300),
+            const Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 64,
+              color: AppColors.slate300,
+            ),
             const SizedBox(height: 16),
-            const Text('No transactions found.', style: TextStyle(color: AppColors.slate500, fontSize: 16)),
+            const Text(
+              'No transactions found.',
+              style: TextStyle(color: AppColors.slate500, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -134,20 +177,37 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
 
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
               backgroundColor: statusColor.withValues(alpha: 0.1),
               child: Icon(statusIcon, color: statusColor),
             ),
-            title: Text('₹${payment.amount.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            title: Text(
+              '₹${payment.amount.toStringAsFixed(0)}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 4),
-                Text(payment.description, style: const TextStyle(fontSize: 13, color: AppColors.slate700)),
-                Text('Date: ${payment.paymentDate}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                Text(
+                  payment.description,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.slate700,
+                  ),
+                ),
+                Text(
+                  'Date: ${payment.paymentDate}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.slate500,
+                  ),
+                ),
               ],
             ),
             trailing: Container(
@@ -156,7 +216,14 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
                 color: statusColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(payment.status, style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12)),
+              child: Text(
+                payment.status,
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
             ),
           ),
         );
@@ -164,7 +231,10 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
     );
   }
 
-  void _showGenerateInvoiceForm(BuildContext context, DatabaseService dbService) {
+  void _showGenerateInvoiceForm(
+    BuildContext context,
+    DatabaseService dbService,
+  ) {
     final formKey = GlobalKey<FormState>();
     String entityType = 'Rent';
     String description = '';
@@ -191,17 +261,33 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Generate Invoice', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                const Text(
+                  'Generate Invoice',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
                   value: entityType,
-                  decoration: const InputDecoration(labelText: 'Invoice Type', border: OutlineInputBorder()),
-                  items: ['Rent', 'Service Fee', 'Legal Fee', 'Other'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Invoice Type',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ['Rent', 'Service Fee', 'Legal Fee', 'Other']
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
                   onChanged: (val) => entityType = val!,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Amount (₹)', border: OutlineInputBorder(), prefixText: '₹ '),
+                  decoration: const InputDecoration(
+                    labelText: 'Amount (₹)',
+                    border: OutlineInputBorder(),
+                    prefixText: '₹ ',
+                  ),
                   keyboardType: TextInputType.number,
                   validator: (val) {
                     if (val == null || val.isEmpty) return 'Required';
@@ -212,9 +298,13 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    border: OutlineInputBorder(),
+                  ),
                   maxLines: 2,
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => description = val!,
                 ),
                 const SizedBox(height: 24),
@@ -224,30 +314,52 @@ class _CrmPaymentsPageState extends State<CrmPaymentsPage> with SingleTickerProv
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     onPressed: () async {
                       if (formKey.currentState!.validate()) {
                         formKey.currentState!.save();
                         Navigator.pop(bottomSheetContext);
-                        
+
                         try {
-                          await dbService.generateInvoice(dummyEntityId, entityType, amount, description);
+                          await dbService.generateInvoice(
+                            dummyEntityId,
+                            entityType,
+                            amount,
+                            description,
+                          );
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Invoice generated successfully!'), backgroundColor: Colors.green),
+                              const SnackBar(
+                                content: Text(
+                                  'Invoice generated successfully!',
+                                ),
+                                backgroundColor: Colors.green,
+                              ),
                             );
                           }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error generating invoice: $e'), backgroundColor: Colors.red),
+                              SnackBar(
+                                content: Text('Error generating invoice: $e'),
+                                backgroundColor: Colors.red,
+                              ),
                             );
                           }
                         }
                       }
                     },
-                    child: const Text('Generate & Send', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text(
+                      'Generate & Send',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

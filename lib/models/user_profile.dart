@@ -1,5 +1,13 @@
 enum UserRole {
-  owner, tenant, staff, sales, dataEntry, verification, biometric, manager, admin
+  owner,
+  tenant,
+  staff,
+  sales,
+  dataEntry,
+  verification,
+  biometric,
+  manager,
+  admin,
 }
 
 class UserProfile {
@@ -14,7 +22,14 @@ class UserProfile {
   final String joinedDate;
 
   UserProfile({
-    required this.id, required this.name, required this.email, required this.mobile,
-    required this.role, this.aadhaar, this.pan, this.address, required this.joinedDate,
+    required this.id,
+    required this.name,
+    required this.email,
+    required this.mobile,
+    required this.role,
+    this.aadhaar,
+    this.pan,
+    this.address,
+    required this.joinedDate,
   });
 }

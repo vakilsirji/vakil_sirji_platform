@@ -17,16 +17,22 @@ class ClientProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final dbService = context.watch<DatabaseService>();
     final isOwner = client.role == 'owner';
-    
+
     // Filter global state for this specific client
     List<Property> clientProperties = [];
     if (isOwner) {
-      clientProperties = dbService.properties.where((p) => p.ownerId == client.id).toList();
+      clientProperties = dbService.properties
+          .where((p) => p.ownerId == client.id)
+          .toList();
     } else {
       // If tenant, find the property they are renting
-      final tenantRecord = dbService.tenants.where((t) => t.id == client.id).firstOrNull;
+      final tenantRecord = dbService.tenants
+          .where((t) => t.id == client.id)
+          .firstOrNull;
       if (tenantRecord != null) {
-        final prop = dbService.properties.where((p) => p.id == tenantRecord.propertyId).firstOrNull;
+        final prop = dbService.properties
+            .where((p) => p.id == tenantRecord.propertyId)
+            .firstOrNull;
         if (prop != null) {
           clientProperties = [prop];
         }
@@ -38,7 +44,9 @@ class ClientProfilePage extends StatelessWidget {
       return c.tenantId == client.id; // tenant cases
     }).toList();
 
-    final clientDocs = dbService.documents.where((d) => d.entityId == client.id).toList();
+    final clientDocs = dbService.documents
+        .where((d) => d.entityId == client.id)
+        .toList();
 
     return DefaultTabController(
       length: 4,
@@ -104,14 +112,24 @@ class ClientProfilePage extends StatelessWidget {
             radius: 40,
             backgroundColor: Colors.white.withValues(alpha: 0.1),
             child: Text(
-              client.name.isNotEmpty ? client.name.substring(0, 1).toUpperCase() : '?',
-              style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+              client.name.isNotEmpty
+                  ? client.name.substring(0, 1).toUpperCase()
+                  : '?',
+              style: const TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
           ),
           const SizedBox(height: 12),
           Text(
             client.name,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
           const SizedBox(height: 4),
           Container(
@@ -123,7 +141,11 @@ class ClientProfilePage extends StatelessWidget {
             ),
             child: Text(
               isOwner ? 'Property Owner' : 'Tenant',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: roleColor),
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: roleColor,
+              ),
             ),
           ),
           const SizedBox(height: 16),
@@ -132,12 +154,18 @@ class ClientProfilePage extends StatelessWidget {
             children: [
               const Icon(Icons.phone, size: 16, color: Colors.white70),
               const SizedBox(width: 8),
-              Text(client.mobile, style: const TextStyle(color: Colors.white70)),
+              Text(
+                client.mobile,
+                style: const TextStyle(color: Colors.white70),
+              ),
               if (client.email != null && client.email!.isNotEmpty) ...[
                 const SizedBox(width: 24),
                 const Icon(Icons.email, size: 16, color: Colors.white70),
                 const SizedBox(width: 8),
-                Text(client.email!, style: const TextStyle(color: Colors.white70)),
+                Text(
+                  client.email!,
+                  style: const TextStyle(color: Colors.white70),
+                ),
               ],
             ],
           ),
@@ -154,7 +182,12 @@ class ClientProfilePage extends StatelessWidget {
           children: [
             Icon(Icons.home_work_outlined, size: 64, color: AppColors.slate300),
             const SizedBox(height: 16),
-            Text(isOwner ? 'No properties added yet.' : 'No active rented property.', style: const TextStyle(color: AppColors.slate500)),
+            Text(
+              isOwner
+                  ? 'No properties added yet.'
+                  : 'No active rented property.',
+              style: const TextStyle(color: AppColors.slate500),
+            ),
           ],
         ),
       );
@@ -168,15 +201,23 @@ class ClientProfilePage extends StatelessWidget {
         return Card(
           elevation: 2,
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: Container(
               padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: const Icon(Icons.location_city, color: Colors.blue),
             ),
-            title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              p.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -185,8 +226,18 @@ class ClientProfilePage extends StatelessWidget {
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.currency_rupee, size: 14, color: Colors.green),
-                    Text('${p.rentAmount}/mo', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                    const Icon(
+                      Icons.currency_rupee,
+                      size: 14,
+                      color: Colors.green,
+                    ),
+                    Text(
+                      '${p.rentAmount}/mo',
+                      style: const TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -199,7 +250,12 @@ class ClientProfilePage extends StatelessWidget {
 
   Widget _buildCasesTab(List<LegalCase> cases) {
     if (cases.isEmpty) {
-      return const Center(child: Text('No cases or services found.', style: TextStyle(color: AppColors.slate500)));
+      return const Center(
+        child: Text(
+          'No cases or services found.',
+          style: TextStyle(color: AppColors.slate500),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -210,14 +266,19 @@ class ClientProfilePage extends StatelessWidget {
         return Card(
           elevation: 2,
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
               backgroundColor: AppColors.slate100,
               child: const Icon(Icons.assignment, color: Color(0xFF0F172A)),
             ),
-            title: Text(c.serviceType, style: const TextStyle(fontWeight: FontWeight.bold)),
+            title: Text(
+              c.serviceType,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Text('Status: ${c.status}'),
             trailing: const Icon(Icons.chevron_right),
           ),
@@ -234,9 +295,15 @@ class ClientProfilePage extends StatelessWidget {
           children: [
             Icon(Icons.folder_open, size: 64, color: AppColors.slate300),
             const SizedBox(height: 16),
-            const Text('Document Vault', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text(
+              'Document Vault',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             const SizedBox(height: 8),
-            const Text('No documents uploaded for this client yet.', style: TextStyle(color: AppColors.slate500)),
+            const Text(
+              'No documents uploaded for this client yet.',
+              style: TextStyle(color: AppColors.slate500),
+            ),
           ],
         ),
       );
@@ -248,7 +315,8 @@ class ClientProfilePage extends StatelessWidget {
       itemBuilder: (context, index) {
         final doc = documents[index];
         IconData docIcon = Icons.insert_drive_file;
-        if (doc.documentType.toLowerCase().contains('aadhaar') || doc.documentType.toLowerCase().contains('pan')) {
+        if (doc.documentType.toLowerCase().contains('aadhaar') ||
+            doc.documentType.toLowerCase().contains('pan')) {
           docIcon = Icons.badge;
         } else if (doc.documentType.toLowerCase().contains('bill')) {
           docIcon = Icons.receipt;
@@ -256,15 +324,23 @@ class ClientProfilePage extends StatelessWidget {
 
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
             contentPadding: const EdgeInsets.all(16),
             leading: CircleAvatar(
               backgroundColor: Colors.blueAccent.withValues(alpha: 0.1),
               child: Icon(docIcon, color: Colors.blueAccent),
             ),
-            title: Text(doc.documentType, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('Uploaded: ${doc.uploadedAt.toLocal().toString().substring(0, 10)}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+            title: Text(
+              doc.documentType,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              'Uploaded: ${doc.uploadedAt.toLocal().toString().substring(0, 10)}',
+              style: const TextStyle(fontSize: 12, color: AppColors.slate500),
+            ),
             trailing: const Icon(Icons.download, color: AppColors.slate400),
           ),
         );
@@ -273,8 +349,9 @@ class ClientProfilePage extends StatelessWidget {
   }
 
   Widget _buildTimelineTab(List<LegalCase> cases) {
-    final sortedCases = List<LegalCase>.from(cases)..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    
+    final sortedCases = List<LegalCase>.from(cases)
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
@@ -297,7 +374,13 @@ class ClientProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineItem({required String title, required String description, required DateTime date, required IconData icon, required Color color}) {
+  Widget _buildTimelineItem({
+    required String title,
+    required String description,
+    required DateTime date,
+    required IconData icon,
+    required Color color,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Row(
@@ -307,7 +390,10 @@ class ClientProfilePage extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: color.withValues(alpha: 0.2), shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
                 child: Icon(icon, size: 16, color: color),
               ),
               const SizedBox(height: 8),
@@ -322,12 +408,27 @@ class ClientProfilePage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                    Text(DateFormat('MMM d, yyyy').format(date), style: const TextStyle(color: AppColors.slate500, fontSize: 12)),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    Text(
+                      DateFormat('MMM d, yyyy').format(date),
+                      style: const TextStyle(
+                        color: AppColors.slate500,
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(description, style: const TextStyle(color: AppColors.slate600)),
+                Text(
+                  description,
+                  style: const TextStyle(color: AppColors.slate600),
+                ),
               ],
             ),
           ),

@@ -13,7 +13,8 @@ class LeadsPage extends StatefulWidget {
   State<LeadsPage> createState() => _LeadsPageState();
 }
 
-class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMixin {
+class _LeadsPageState extends State<LeadsPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final List<String> _statuses = [
     'New Lead',
@@ -21,7 +22,7 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
     'Interested',
     'Not Interested',
     'Converted',
-    'Lost'
+    'Lost',
   ];
 
   @override
@@ -29,8 +30,12 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
     super.initState();
     int initialIndex = _statuses.indexOf(widget.initialFilter);
     if (initialIndex == -1) initialIndex = 0;
-    
-    _tabController = TabController(length: _statuses.length, vsync: this, initialIndex: initialIndex);
+
+    _tabController = TabController(
+      length: _statuses.length,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
   }
 
   @override
@@ -47,7 +52,14 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
     return Scaffold(
       backgroundColor: AppColors.slate50,
       appBar: AppBar(
-        title: const Text('Leads Dashboard', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
+        title: const Text(
+          'Leads Dashboard',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
         backgroundColor: const Color(0xFF0F172A),
         iconTheme: const IconThemeData(color: Colors.white),
         bottom: TabBar(
@@ -64,12 +76,22 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
                   Text(status),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.redAccent.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: Text('$count', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
+                    child: Text(
+                      '$count',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -80,7 +102,9 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
       body: TabBarView(
         controller: _tabController,
         children: _statuses.map((status) {
-          final leadsForStatus = allLeads.where((l) => l.status == status).toList();
+          final leadsForStatus = allLeads
+              .where((l) => l.status == status)
+              .toList();
           return _buildLeadList(leadsForStatus, status, dbService);
         }).toList(),
       ),
@@ -88,12 +112,19 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
         onPressed: () => _showAddLeadForm(context, dbService),
         backgroundColor: Colors.redAccent,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Lead', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'New Lead',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
 
-  Widget _buildLeadList(List<Lead> leads, String currentStatus, DatabaseService dbService) {
+  Widget _buildLeadList(
+    List<Lead> leads,
+    String currentStatus,
+    DatabaseService dbService,
+  ) {
     if (leads.isEmpty) {
       return Center(
         child: Column(
@@ -101,7 +132,10 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
           children: [
             Icon(Icons.inbox_outlined, size: 64, color: AppColors.slate300),
             const SizedBox(height: 16),
-            Text('No leads in "$currentStatus"', style: const TextStyle(color: AppColors.slate500, fontSize: 16)),
+            Text(
+              'No leads in "$currentStatus"',
+              style: const TextStyle(color: AppColors.slate500, fontSize: 16),
+            ),
           ],
         ),
       );
@@ -154,8 +188,20 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(lead.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text(lead.mobile, style: const TextStyle(color: AppColors.slate500, fontSize: 13)),
+                        Text(
+                          lead.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          lead.mobile,
+                          style: const TextStyle(
+                            color: AppColors.slate500,
+                            fontSize: 13,
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -169,7 +215,9 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
                     );
                   },
                   itemBuilder: (context) {
-                    return _statuses.where((s) => s != lead.status).map((status) {
+                    return _statuses.where((s) => s != lead.status).map((
+                      status,
+                    ) {
                       return PopupMenuItem<String>(
                         value: status,
                         child: Text('Move to $status'),
@@ -191,7 +239,10 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
                 ),
                 child: Text(
                   lead.notes!,
-                  style: const TextStyle(color: AppColors.slate700, fontSize: 13),
+                  style: const TextStyle(
+                    color: AppColors.slate700,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
@@ -201,14 +252,21 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
               children: [
                 Text(
                   'Created: ${lead.createdAt.toLocal().toString().substring(0, 10)}',
-                  style: const TextStyle(color: AppColors.slate400, fontSize: 11),
+                  style: const TextStyle(
+                    color: AppColors.slate400,
+                    fontSize: 11,
+                  ),
                 ),
                 Text(
                   'Source: ${lead.source}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.slate600, fontSize: 12),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.slate600,
+                    fontSize: 12,
+                  ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
@@ -243,37 +301,65 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Add New Lead', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                const Text(
+                  'Add New Lead',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Name', border: OutlineInputBorder()),
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => name = val!,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Mobile Number', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Mobile Number',
+                    border: OutlineInputBorder(),
+                  ),
                   keyboardType: TextInputType.phone,
-                  validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                  validator: (val) =>
+                      val == null || val.isEmpty ? 'Required' : null,
                   onSaved: (val) => mobile = val!,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: source,
-                  decoration: const InputDecoration(labelText: 'Source', border: OutlineInputBorder()),
-                  items: ['Website', 'WhatsApp', 'Phone Call', 'Facebook'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Source',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ['Website', 'WhatsApp', 'Phone Call', 'Facebook']
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
                   onChanged: (val) => source = val!,
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: status,
-                  decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
-                  items: _statuses.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: _statuses
+                      .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                      .toList(),
                   onChanged: (val) => status = val!,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
-                  decoration: const InputDecoration(labelText: 'Notes (Optional)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                    labelText: 'Notes (Optional)',
+                    border: OutlineInputBorder(),
+                  ),
                   maxLines: 2,
                   onSaved: (val) => notes = val ?? '',
                 ),
@@ -284,30 +370,51 @@ class _LeadsPageState extends State<LeadsPage> with SingleTickerProviderStateMix
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                     onPressed: () async {
                       if (formKey.currentState!.validate()) {
                         formKey.currentState!.save();
                         Navigator.pop(bottomSheetContext);
-                        
+
                         try {
-                          await dbService.addLead(name, mobile, source, status, notes);
+                          await dbService.addLead(
+                            name,
+                            mobile,
+                            source,
+                            status,
+                            notes,
+                          );
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Lead added successfully!'), backgroundColor: Colors.green),
+                              const SnackBar(
+                                content: Text('Lead added successfully!'),
+                                backgroundColor: Colors.green,
+                              ),
                             );
                           }
                         } catch (e) {
                           if (mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Error adding lead: $e'), backgroundColor: Colors.red),
+                              SnackBar(
+                                content: Text('Error adding lead: $e'),
+                                backgroundColor: Colors.red,
+                              ),
                             );
                           }
                         }
                       }
                     },
-                    child: const Text('Save Lead', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                    child: const Text(
+                      'Save Lead',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 24),

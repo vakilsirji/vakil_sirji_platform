@@ -29,15 +29,21 @@ class AuthService extends ChangeNotifier {
 
   Future<void> _fetchUserProfile(String userId) async {
     try {
-      final response = await _supabase.from('profiles').select().eq('id', userId).single();
+      final response = await _supabase
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .single();
       _userProfile = UserProfile(
         id: response['id'] ?? userId,
         name: response['name'] ?? 'Unknown',
         email: response['email'] ?? '',
         mobile: response['mobile'] ?? '',
         role: UserRole.values.firstWhere(
-          (e) => e.toString().split('.').last.toLowerCase() == (response['role']?.toString().toLowerCase() ?? 'owner'), 
-          orElse: () => UserRole.owner
+          (e) =>
+              e.toString().split('.').last.toLowerCase() ==
+              (response['role']?.toString().toLowerCase() ?? 'owner'),
+          orElse: () => UserRole.owner,
         ),
         joinedDate: response['joined_date'] ?? DateTime.now().toIso8601String(),
       );
@@ -50,41 +56,45 @@ class AuthService extends ChangeNotifier {
 
   Future<void> signIn(String email, String password) async {
     final cleanEmail = email.trim().toLowerCase();
-    
-    await _supabase.auth.signInWithPassword(email: cleanEmail, password: password);
+
+    await _supabase.auth.signInWithPassword(
+      email: cleanEmail,
+      password: password,
+    );
   }
 
-  Future<void> signUp(String email, String password, String name, String mobile, String role) async {
+  Future<void> signUp(
+    String email,
+    String password,
+    String name,
+    String mobile,
+    String role,
+  ) async {
     await _supabase.auth.signUp(
       email: email,
       password: password,
-      data: {
-        'name': name,
-        'mobile': mobile,
-        'role': role.toLowerCase(),
-      }
+      data: {'name': name, 'mobile': mobile, 'role': role.toLowerCase()},
     );
   }
 
   // Uses a temporary client so the admin's session isn't overwritten
-  Future<void> adminCreateStaff(String email, String password, String name, String mobile) async {
+  Future<void> adminCreateStaff(
+    String email,
+    String password,
+    String name,
+    String mobile,
+  ) async {
     final tempClient = SupabaseClient(
       AppConstants.supabaseUrl,
       AppConstants.supabaseAnonKey,
-      authOptions: const AuthClientOptions(
-        authFlowType: AuthFlowType.implicit,
-      ),
+      authOptions: const AuthClientOptions(authFlowType: AuthFlowType.implicit),
     );
 
     try {
       await tempClient.auth.signUp(
         email: email,
         password: password,
-        data: {
-          'name': name,
-          'mobile': mobile,
-          'role': 'staff',
-        }
+        data: {'name': name, 'mobile': mobile, 'role': 'staff'},
       );
     } finally {
       tempClient.dispose();

@@ -15,7 +15,7 @@ class Property {
   String? currentTenantId;
   final String? propertyTaxDueDate;
   final String? insuranceRenewalDate;
-  
+
   bool reminderEnabled;
   int reminderDueDay;
   String reminderChannel;
@@ -23,13 +23,26 @@ class Property {
   String? agreementEndDate;
 
   Property({
-    required this.id, required this.ownerId, required this.name, required this.address,
-    required this.city, required this.state, required this.pinCode, this.propertyType = 'Flat',
-    this.photos, this.propertyTaxNumber,
-    this.electricityBillConsumerNo, required this.rentAmount, required this.depositAmount,
-    this.currentTenantId, this.propertyTaxDueDate, this.insuranceRenewalDate,
-    this.reminderEnabled = false, this.reminderDueDay = 5,
-    this.reminderChannel = 'WhatsApp', this.lastReminderSentDate,
+    required this.id,
+    required this.ownerId,
+    required this.name,
+    required this.address,
+    required this.city,
+    required this.state,
+    required this.pinCode,
+    this.propertyType = 'Flat',
+    this.photos,
+    this.propertyTaxNumber,
+    this.electricityBillConsumerNo,
+    required this.rentAmount,
+    required this.depositAmount,
+    this.currentTenantId,
+    this.propertyTaxDueDate,
+    this.insuranceRenewalDate,
+    this.reminderEnabled = false,
+    this.reminderDueDay = 5,
+    this.reminderChannel = 'WhatsApp',
+    this.lastReminderSentDate,
     this.agreementEndDate,
   });
 

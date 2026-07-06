@@ -62,7 +62,10 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
     final pages = [
       const CrmOverviewPage(),
       CrmCasesPage(cases: cases),
-      if (userProfile != null) ProfilePage(user: userProfile) else const Center(child: Text('Loading Profile...')),
+      if (userProfile != null)
+        ProfilePage(user: userProfile)
+      else
+        const Center(child: Text('Loading Profile...')),
     ];
 
     return Scaffold(
@@ -74,14 +77,25 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(color: Colors.amber, borderRadius: BorderRadius.circular(6)),
-              child: const Icon(Icons.shield, color: Color(0xFF0F172A), size: 18),
+              decoration: BoxDecoration(
+                color: Colors.amber,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Icon(
+                Icons.shield,
+                color: Color(0xFF0F172A),
+                size: 18,
+              ),
             ),
             const SizedBox(width: 8),
             Flexible(
               child: Text(
                 'GharBook - $roleName',
-                style: const TextStyle(fontWeight: FontWeight.w800, color: Colors.white, fontSize: 16),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  fontSize: 16,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -109,9 +123,18 @@ class _StaffDashboardScreenState extends State<StaffDashboardScreen> {
         selectedItemColor: const Color(0xFF0F172A),
         unselectedItemColor: AppColors.slate400,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Overview'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Case Queue'),
-          BottomNavigationBarItem(icon: Icon(Icons.fingerprint), label: 'Biometrics'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard),
+            label: 'Overview',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment),
+            label: 'Case Queue',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.fingerprint),
+            label: 'Biometrics',
+          ),
         ],
       ),
     );

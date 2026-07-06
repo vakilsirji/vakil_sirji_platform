@@ -14,7 +14,7 @@ class AuthWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = context.watch<AuthService>();
-    
+
     if (authService.isAuthenticated) {
       // Role-based routing
       if (authService.userProfile != null) {
@@ -29,7 +29,7 @@ class AuthWrapper extends StatelessWidget {
           return const StaffDashboardScreen();
         }
       }
-      
+
       // Show loading while fetching profile
       return Scaffold(
         backgroundColor: const Color(0xFFF8FAFC), // slate50

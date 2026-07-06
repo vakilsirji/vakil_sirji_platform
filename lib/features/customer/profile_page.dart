@@ -22,7 +22,11 @@ class ProfilePage extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               boxShadow: [
-                BoxShadow(color: Colors.amber.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 4)),
+                BoxShadow(
+                  color: Colors.amber.withValues(alpha: 0.3),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
               ],
             ),
             child: const CircleAvatar(
@@ -32,7 +36,14 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Text(user.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+          Text(
+            user.name,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+            ),
+          ),
           const SizedBox(height: 4),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -40,24 +51,46 @@ class ProfilePage extends StatelessWidget {
               color: Colors.indigo.shade50,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Text(user.role.name.toUpperCase(), style: TextStyle(fontSize: 10, color: Colors.indigo.shade700, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+            child: Text(
+              user.role.name.toUpperCase(),
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.indigo.shade700,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.1,
+              ),
+            ),
           ),
           const SizedBox(height: 32),
           _buildSectionHeader('Personal Information'),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 1,
             shadowColor: AppColors.slate200,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _buildInfoRow(Icons.email_outlined, 'Email Address', user.email),
+                  _buildInfoRow(
+                    Icons.email_outlined,
+                    'Email Address',
+                    user.email,
+                  ),
                   const Divider(height: 24, thickness: 0.5),
-                  _buildInfoRow(Icons.phone_outlined, 'Mobile Number', user.mobile),
+                  _buildInfoRow(
+                    Icons.phone_outlined,
+                    'Mobile Number',
+                    user.mobile,
+                  ),
                   if (user.address != null) ...[
                     const Divider(height: 24, thickness: 0.5),
-                    _buildInfoRow(Icons.location_on_outlined, 'Registered Address', user.address!),
+                    _buildInfoRow(
+                      Icons.location_on_outlined,
+                      'Registered Address',
+                      user.address!,
+                    ),
                   ],
                 ],
               ),
@@ -66,7 +99,9 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(height: 24),
           _buildSectionHeader('Identity & Documents'),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 1,
             shadowColor: AppColors.slate200,
             child: Padding(
@@ -74,14 +109,26 @@ class ProfilePage extends StatelessWidget {
               child: Column(
                 children: [
                   if (user.aadhaar != null) ...[
-                    _buildInfoRow(Icons.badge_outlined, 'Aadhaar UID', user.aadhaar!),
+                    _buildInfoRow(
+                      Icons.badge_outlined,
+                      'Aadhaar UID',
+                      user.aadhaar!,
+                    ),
                     const Divider(height: 24, thickness: 0.5),
                   ],
                   if (user.pan != null) ...[
-                    _buildInfoRow(Icons.credit_card_outlined, 'PAN Card', user.pan!),
+                    _buildInfoRow(
+                      Icons.credit_card_outlined,
+                      'PAN Card',
+                      user.pan!,
+                    ),
                     const Divider(height: 24, thickness: 0.5),
                   ],
-                  _buildInfoRow(Icons.date_range_outlined, 'Joined Date', user.joinedDate),
+                  _buildInfoRow(
+                    Icons.date_range_outlined,
+                    'Joined Date',
+                    user.joinedDate,
+                  ),
                 ],
               ),
             ),
@@ -95,12 +142,17 @@ class ProfilePage extends StatelessWidget {
               await context.read<AuthService>().signOut();
             },
             icon: const Icon(Icons.logout),
-            label: const Text('Sign Out', style: TextStyle(fontWeight: FontWeight.bold)),
+            label: const Text(
+              'Sign Out',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red.shade50,
               foregroundColor: Colors.red.shade700,
               elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               minimumSize: const Size(double.infinity, 50),
             ),
           ),
@@ -113,7 +165,10 @@ class ProfilePage extends StatelessWidget {
       return Scaffold(
         backgroundColor: AppColors.slate50,
         appBar: AppBar(
-          title: const Text('My Profile', style: TextStyle(color: Colors.white, fontSize: 16)),
+          title: const Text(
+            'My Profile',
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
           backgroundColor: const Color(0xFF0F172A),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -128,7 +183,14 @@ class ProfilePage extends StatelessWidget {
       padding: const EdgeInsets.only(left: 4, bottom: 12),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.slate500)),
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+            color: AppColors.slate500,
+          ),
+        ),
       ),
     );
   }
@@ -139,7 +201,10 @@ class ProfilePage extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: AppColors.slate50, borderRadius: BorderRadius.circular(8)),
+          decoration: BoxDecoration(
+            color: AppColors.slate50,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Icon(icon, size: 16, color: const Color(0xFF0F172A)),
         ),
         const SizedBox(width: 12),
@@ -147,9 +212,19 @@ class ProfilePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(color: AppColors.slate500, fontSize: 10)),
+              Text(
+                label,
+                style: const TextStyle(color: AppColors.slate500, fontSize: 10),
+              ),
               const SizedBox(height: 2),
-              Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A))),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: Color(0xFF0F172A),
+                ),
+              ),
             ],
           ),
         ),

@@ -13,7 +13,10 @@ class CrmCasesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     if (cases.isEmpty) {
       return const Center(
-        child: Text('No cases in the CRM Queue', style: TextStyle(fontSize: 16, color: AppColors.slate500)),
+        child: Text(
+          'No cases in the CRM Queue',
+          style: TextStyle(fontSize: 16, color: AppColors.slate500),
+        ),
       );
     }
 
@@ -25,7 +28,9 @@ class CrmCasesPage extends StatelessWidget {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -34,18 +39,50 @@ class CrmCasesPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('CASE: ${c.requestId.substring(0, 8).toUpperCase()}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                    Text(
+                      'CASE: ${c.requestId.substring(0, 8).toUpperCase()}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.amber.shade100, borderRadius: BorderRadius.circular(4)),
-                      child: Text(c.status.name.toUpperCase(), style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.amber.shade900)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.shade100,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        c.status.name.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade900,
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(c.serviceType, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
+                Text(
+                  c.serviceType,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text('Client: ${c.clientName} | Requested: ${c.createdAt}', style: const TextStyle(fontSize: 12, color: AppColors.slate500)),
+                Text(
+                  'Client: ${c.clientName} | Requested: ${c.createdAt}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.slate500,
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -55,14 +92,17 @@ class CrmCasesPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProcessCaseScreen(legalCase: c),
+                              builder: (context) =>
+                                  ProcessCaseScreen(legalCase: c),
                             ),
                           );
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0F172A), 
+                          backgroundColor: const Color(0xFF0F172A),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
                         child: const Text('Process Case'),
                       ),

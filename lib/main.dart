@@ -8,7 +8,7 @@ import 'services/database_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await SupabaseService.initialize();
   } catch (e) {

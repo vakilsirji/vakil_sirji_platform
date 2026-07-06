@@ -31,14 +31,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful! Please sign in.'), backgroundColor: AppColors.emerald600),
+          const SnackBar(
+            content: Text('Registration successful! Please sign in.'),
+            backgroundColor: AppColors.emerald600,
+          ),
         );
         context.go('/');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${e.toString()}'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Registration failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -78,13 +84,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   height: 80,
                   width: 80,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.person_add_alt_1, size: 64, color: Color(0xFF0F172A)),
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.person_add_alt_1,
+                    size: 64,
+                    color: Color(0xFF0F172A),
+                  ),
                 ),
               ),
               const SizedBox(height: 16),
               const Text(
                 'Join GharBook',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A),
+                ),
               ),
               const SizedBox(height: 8),
               const Text(
@@ -95,7 +109,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 32),
               Card(
                 elevation: 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -148,7 +164,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: OutlineInputBorder(),
                         ),
                         items: ['Owner', 'Tenant', 'Staff'].map((role) {
-                          return DropdownMenuItem(value: role, child: Text(role));
+                          return DropdownMenuItem(
+                            value: role,
+                            child: Text(role),
+                          );
                         }).toList(),
                         onChanged: (val) {
                           if (val != null) setState(() => _selectedRole = val);
@@ -161,11 +180,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           backgroundColor: const Color(0xFF0F172A),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        child: _isLoading 
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text('Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Register',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ],
                   ),

@@ -49,7 +49,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final dbService = context.watch<DatabaseService>();
-    
+
     if (dbService.isLoading) {
       return const Scaffold(
         body: Center(
@@ -70,7 +70,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final payments = dbService.payments;
 
     final List<Widget> pages = [
-      AdminOverviewPage(properties: properties, payments: payments, cases: cases),
+      AdminOverviewPage(
+        properties: properties,
+        payments: payments,
+        cases: cases,
+      ),
       CrmCasesPage(cases: cases),
       ProfilePage(user: _currentUser),
     ];
@@ -89,7 +93,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: Colors.redAccent,
                 borderRadius: BorderRadius.circular(6),
               ),
-              child: const Icon(Icons.admin_panel_settings, color: Colors.white, size: 18),
+              child: const Icon(
+                Icons.admin_panel_settings,
+                color: Colors.white,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 8),
             const Flexible(
@@ -108,7 +116,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         backgroundColor: const Color(0xFF0F172A),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_active, color: Colors.redAccent, size: 20),
+            icon: const Icon(
+              Icons.notifications_active,
+              color: Colors.redAccent,
+              size: 20,
+            ),
             onPressed: () {},
           ),
           const SizedBox(width: 12),
@@ -126,12 +138,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         backgroundColor: Colors.white,
         selectedItemColor: Colors.redAccent,
         unselectedItemColor: AppColors.slate400,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
         unselectedLabelStyle: const TextStyle(fontSize: 10),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard_outlined), activeIcon: Icon(Icons.dashboard), label: 'Overview'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'CRM Queue'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle_outlined), activeIcon: Icon(Icons.account_circle), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard_outlined),
+            activeIcon: Icon(Icons.dashboard),
+            label: 'Overview',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.assignment),
+            label: 'CRM Queue',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle_outlined),
+            activeIcon: Icon(Icons.account_circle),
+            label: 'Profile',
+          ),
         ],
       ),
     );
