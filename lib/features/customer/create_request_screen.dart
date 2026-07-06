@@ -98,11 +98,58 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
   }
 
   void _submit() {
-    Map<String, dynamic>? manualDetails = {};
+    Map<String, dynamic> manualDetails = {};
 
+    // 1. Property Details
+    if (_selectedPropertyId != null) {
+      try {
+        final prop = widget.properties.firstWhere((p) => p.id == _selectedPropertyId);
+        manualDetails['property_name'] = prop.name;
+        manualDetails['property_address'] = prop.address;
+      } catch (_) {}
+    }
+
+    // 2. Owner Details
+    if (_ctrls.containsKey('owner_name') && _ctrls['owner_name']!.text.isNotEmpty) {
+      manualDetails['owner_name'] = _ctrls['owner_name']!.text;
+    }
+    if (_ctrls.containsKey('owner_mobile') && _ctrls['owner_mobile']!.text.isNotEmpty) {
+      manualDetails['owner_mobile'] = _ctrls['owner_mobile']!.text;
+    }
+
+    // 3. Tenant Details
+    if (_selectedTenantId != null) {
+      try {
+        final tenant = widget.tenants.firstWhere((t) => t.id == _selectedTenantId);
+        manualDetails['tenant_name'] = tenant.name;
+        manualDetails['tenant_mobile'] = tenant.mobile;
+      } catch (_) {}
+    } else if (_ctrls.containsKey('tenant_name') && _ctrls['tenant_name']!.text.isNotEmpty) {
+      manualDetails['tenant_name'] = _ctrls['tenant_name']!.text;
+    }
+
+    // 4. Agreement Start and End
+    if (_ctrls.containsKey('existing_start_date') && _ctrls['existing_start_date']!.text.isNotEmpty) {
+      manualDetails['existing_start_date'] = _ctrls['existing_start_date']!.text;
+    }
+    if (_ctrls.containsKey('existing_end_date') && _ctrls['existing_end_date']!.text.isNotEmpty) {
+      manualDetails['existing_end_date'] = _ctrls['existing_end_date']!.text;
+    }
+
+    // 5. Rent and Deposit
+    if (_ctrls.containsKey('existing_rent_amount') && _ctrls['existing_rent_amount']!.text.isNotEmpty) {
+      manualDetails['existing_rent_amount'] = _ctrls['existing_rent_amount']!.text;
+    }
+    if (_ctrls.containsKey('existing_deposit_amount') && _ctrls['existing_deposit_amount']!.text.isNotEmpty) {
+      manualDetails['existing_deposit_amount'] = _ctrls['existing_deposit_amount']!.text;
+    }
+
+    // Add all remaining filled controllers that weren't already added
     if (_selectedOption == 1 || _selectedOption == 3 || _selectedOption == 2) {
       _ctrls.forEach((key, ctrl) {
-        manualDetails![key] = ctrl.text;
+        if (!manualDetails.containsKey(key) && ctrl.text.isNotEmpty) {
+          manualDetails[key] = ctrl.text;
+        }
       });
       if (_selectedOption == 3) {
         manualDetails['is_existing_agreement'] = true;
@@ -141,7 +188,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     if (picked != null) {
       setState(() {
         _getCtrl(ctrlKey).text =
-            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+            "${picked.day.toString().padLeft(2, '0')}-${picked.month.toString().padLeft(2, '0')}-${picked.year}";
         _calculateEndDate();
       });
     }
@@ -152,15 +199,18 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
     final durationText = _getCtrl('existing_duration_months').text;
     if (startText.isNotEmpty && durationText.isNotEmpty) {
       try {
-        final startDate = DateTime.parse(startText);
-        final months = int.parse(durationText);
-        final endDate = DateTime(
-          startDate.year,
-          startDate.month + months,
-          startDate.day,
-        );
-        _getCtrl('existing_end_date').text =
-            "${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}";
+        final parts = startText.split('-');
+        if (parts.length == 3) {
+          final startDate = DateTime(int.parse(parts[2]), int.parse(parts[1]), int.parse(parts[0]));
+          final months = int.parse(durationText);
+          final endDate = DateTime(
+            startDate.year,
+            startDate.month + months,
+            startDate.day,
+          );
+          _getCtrl('existing_end_date').text =
+              "${endDate.day.toString().padLeft(2, '0')}-${endDate.month.toString().padLeft(2, '0')}-${endDate.year}";
+        }
       } catch (e) {
         // Ignored
       }
@@ -1092,7 +1142,7 @@ class _CreateRequestScreenState extends State<CreateRequestScreen> {
                 child: IgnorePointer(
                   child: _buildTextField(
                     'existing_start_date',
-                    'Start Date (YYYY-MM-DD)',
+                    'Start Date (DD-MM-YYYY)',
                   ),
                 ),
               ),
