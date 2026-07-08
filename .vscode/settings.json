@@ -1,0 +1,10 @@
+{
+    "kiroAgent.trustedCommands": [
+        "",
+        "dart *",
+        "",
+        "",
+        "Get-Content *",
+        "(Get-Content *"
+    ]
+}

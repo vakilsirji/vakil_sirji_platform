@@ -525,9 +525,12 @@ class OverviewPage extends StatelessWidget {
         child: Column(
           children: List.generate(displayCases.length, (index) {
             final c = displayCases[index];
-            final color = _statusColor(c.status);
-            final icon = _statusIcon(c.status);
-            final label = _statusLabel(c.status);
+            final isExistingAgreement = c.details?['is_existing_agreement'] == true;
+            // For existing agreements, use completed status styling
+            final color = isExistingAgreement ? Colors.green : _statusColor(c.status);
+            final icon = isExistingAgreement ? Icons.check_circle : _statusIcon(c.status);
+            // For existing agreements, show "Recorded" instead of "Request Received"
+            final label = isExistingAgreement ? 'Recorded' : _statusLabel(c.status);
             final isLast = index == displayCases.length - 1;
 
             // Format date

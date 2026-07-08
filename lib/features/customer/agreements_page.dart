@@ -150,13 +150,17 @@ class AgreementsPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  c.status.name.toUpperCase(),
+                                  c.details?['is_existing_agreement'] == true 
+                                    ? 'RECORDED' 
+                                    : c.status.name.toUpperCase(),
                                   style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
-                                    color: c.status == AgreementStatus.completed
+                                    color: c.details?['is_existing_agreement'] == true
                                         ? Colors.green.shade700
-                                        : Colors.amber.shade700,
+                                        : (c.status == AgreementStatus.completed
+                                            ? Colors.green.shade700
+                                            : Colors.amber.shade700),
                                   ),
                                 ),
                               ),
